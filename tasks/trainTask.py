@@ -29,6 +29,7 @@ def train(epoch, model, optimizer, criterion, train_data,\
         total_loss += loss.item()
         if batch % log_interval == 0 and batch > 0:
             lr = optimizer.lr
+            #lr = 5e-5
             ms_per_batch = (time.time() - start_time) * 1000 / log_interval
             cur_loss = total_loss / log_interval
             ppl = math.exp(cur_loss)

@@ -1,16 +1,16 @@
-model: 'vanilla-transformer' # vanilla-transformer, U-transformer
+model: 'U-transformer' # vanilla-transformer, U-transformer
 model_config:
   d_model : 768  
   dim_feedforward : 1024 
   nlayers : 2 
   nhead : 4 
-  dropout : 0.7 
-  activation : 'gelu'
+  dropout : 0.2 
+  activation : 'relu'
 dataset_config:
   tokenizer: 'spacy' # spacy, basic_english, char
   dataset: 'wiki2' # wiki2, wiki103
 training:
-  n_epochs : 1
+  n_epochs : 300
   batch_size:  20
   bptt: 128
   clip_grad_norm: 0.5 

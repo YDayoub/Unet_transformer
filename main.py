@@ -23,7 +23,7 @@ def main():
         config_path = args.config
         config = load_config(config_path)
     except Exception as e:
-        print(e)
+        print('Error', e)
         exit(0)
     model_config = config['model_config']
     training_config = config['training']
@@ -45,13 +45,16 @@ def main():
     dropout = model_config['dropout']  # dropout probability
     activation = model_config['activation']  # activation function
     if dataset_config['tokenizer'] == 'char':
-        pass
+        if dataset_config['dataset'] == 'wiki2':
+            ds = wiki2(char=True)
+        else:
+            ds = wiki103(char=True)
     else:
         tokenizer = get_tokenizer(dataset_config['tokenizer'])
-    if dataset_config['dataset'] == 'wiki2':
-        ds = wiki2(tokenizer)
-    elif dataset_config['dataset'] == 'wiki103':
-        ds = wiki103(tokenizer)
+        if dataset_config['dataset'] == 'wiki2':
+            ds = wiki2(tokenizer)
+        elif dataset_config['dataset'] == 'wiki103':
+            ds = wiki103(tokenizer)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     #------------------loading_dataset-----------------#
@@ -61,6 +64,7 @@ def main():
     val_data = batchify(val_data, eval_batch_size, device)
     test_data = batchify(test_data, eval_batch_size, device)
     ntokens = ds.get_vocab_len()  # size of source vocabulary
+
     if config['model'] == 'U-transformer':
         model = UTransformer(ntokens=ntokens, d_model=d_model, nhead=nhead,
                              dim_feedforward=dim_feedforward,
@@ -78,11 +82,12 @@ def main():
     print('-' * 89)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = NoamOpt(d_model, 1, 2000,
-                        torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
+    optimizer = NoamOpt(d_model, 1, 8000,
+                        torch.optim.RAdam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9, weight_decay=1e-5))
+    #optimizer = torch.optim.RAdam(model.parameters(), lr=1.6e-6, weight_decay=1e-3)
 
     trainLoop(model, epochs, train_data, val_data, optimizer,
-              criterion, device, bptt, clip_grad_norm, ntokens,  save_model=True)
+              criterion, device, bptt, clip_grad_norm, ntokens,  save_model=False)
 
     test(model, criterion, test_data, ntokens, bptt, device)
 

@@ -15,8 +15,9 @@ def get_activation_fn(activation):
 class VanillaTransformer(nn.Module):
 
     def __init__(self, ntokens: int,  d_model: int, nhead: int, dim_feedforward: int,
-                 nlayers: int, dropout: float = 0.5, activation: str = 'relu'):
-        super().__init__()
+                 nlayers: int, dropout: float = 0.5,\
+                      activation: str = 'relu', *args, **kwargs):
+        super().__init__( *args, **kwargs)
         self.model_type = 'Vanilla Transformer'
         self.pos_encoder = PositionalEncoding(d_model, dropout)
         self.transformer_encoder = nn.ModuleList([TransformerEncoderLayer(d_model=d_model, nhead=nhead,

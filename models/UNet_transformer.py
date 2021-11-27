@@ -13,8 +13,8 @@ def get_activation_fn(activation):
 class UTransformer(nn.Module):
 
     def __init__(self, ntokens: int,  d_model: int, nhead: int, dim_feedforward: int,
-                 nlayers: int, dropout: float = 0.5, activation: str = 'relu'):
-        super().__init__()
+                 nlayers: int, dropout: float = 0.5, activation: str = 'relu', *args, **kwargs):
+        super().__init__(*args,**kwargs)
         self.model_type = 'U-transformer'
         self.pos_encoder = PositionalEncoding(d_model, dropout)
         self.transformer_encoder = nn.ModuleList([TransformerEncoderLayer(d_model=d_model, nhead=nhead, \
@@ -38,6 +38,11 @@ class UTransformer(nn.Module):
         self.init_weights()
 
     def init_weights(self) -> None:
+        # def initialization(m):
+        #     if isinstance(m, nn.Linear):
+        #         torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
+        #         m.bias.data.fill_(0.01)
+        # self.apply(initialization)
         initrange = 0.1
         self.embedding.weight.data.uniform_(-initrange, initrange)
         self.decoder.bias.data.zero_()
@@ -52,9 +57,10 @@ class UTransformer(nn.Module):
         Returns:
             output Tensor of shape [seq_len, batch_size, ntoken]
         """
-        src = self.embedding(src) * math.sqrt(self.d_model)
+        #src = self.embedding(src) * math.sqrt(self.d_model)
+        src = self.embedding(src) 
         memory = self.pos_encoder(src)
-        memory = self.dropout(memory)
+        #memory = self.dropout(memory)
         encoder_outputs = []
         for layer in self.transformer_encoder:
             memory = layer(memory, src_mask=src_mask)

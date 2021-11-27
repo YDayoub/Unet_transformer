@@ -7,10 +7,11 @@ from .char_tokenizer import CharTokenizer
 
 
 class DatasetBase:
-    def __init__(self, dataloader=None, tokenizer=None, char=False, data=None):
+    def __init__(self, dataloader=None, tokenizer=None, char=False):
         self.char = char
         if char:
-            data_path = '/data/wikitext-2-raw-v1/'
+            #/home/admin/data/wikitext-2-raw/wiki.test.raw
+            data_path = '/home/admin/data/wikitext-2-raw'
             download_data('wikitext-2-raw-v1')
             self.tokenizer = CharTokenizer(data_path)
             self.vocab = self.tokenizer.vocab
