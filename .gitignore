@@ -1,0 +1,16 @@
+checkpoints/
+datasets/__pycache__/
+models/__pycache__/
+optimizers/__pycache__/
+tasks/__pycache__/
+utils/__pycache__/
+.cache/
+.config/
+.local/
+.nv/
+.torchtext/
+.vscode-server/
+.python_history
+.sudo_as_admin_successful
+.wget-hsts
+.python_history
