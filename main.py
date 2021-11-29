@@ -2,7 +2,7 @@ import torch
 from torch import nn, Tensor
 import torch.nn.functional as F
 from optimizers.NoamOptimizer import NoamOpt
-from optimizers.cos_sch_warmupR import CosineWarmUp
+from optimizers.cos_sch_warmupR import CosineAnnealingWarmupRestarts
 from optimizers.linear_warmup import linearcycleWarmup
 from models.UNet_transformer import UTransformer
 from models.vanilla_transformer import VanillaTransformer
@@ -85,14 +85,15 @@ def main():
     print('-' * 89)
 
     criterion = nn.CrossEntropyLoss()
+    steps_per_epoch = len(train_data)//bptt+1
+    total_steps = epochs*(steps_per_epoch)
     opt = torch.optim.RAdam(model.parameters(),\
          lr=0, betas=(0.9, 0.98), eps=1e-9, weight_decay=1e-5)
     #optimizer = NoamOpt(model_size=d_model, factor=1, warmup=8000, optimizer=opt)
     #optimizer = torch.optim.RAdam(model.parameters(), lr=1.6e-6, weight_decay=1e-3)
-    # optimizer = CosineWarmUp(torch.optim.RAdam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9,\
-    #      weight_decay=1e-5),T_0 = 868, T_mult=1, eta_min = 3e-4)
+    # optimizer = CosineAnnealingWarmupRestarts(opt,\
+    #     first_cycle_steps=3*steps_per_epoch, cycle_mult=1.0, max_lr=0.001, min_lr=1e-6, warmup_steps=2*steps_per_epoch, gamma=0.5)
     #print('total_steps: {}'.format(len(train_data)//bptt))
-    total_steps = epochs*(len(train_data)//bptt+1)
     # optimizer = linearcycleWarmup(optimizer=opt, total_steps=5*len(train_data)//bptt,\
     #      pct_start=0.8, anneal_strategy='linear', three_phase=True,\
     #           max_lr=1e-3, steps_per_epoch=len(train_data)//bptt)

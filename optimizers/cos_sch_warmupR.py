@@ -37,11 +37,15 @@ class CosineAnnealingWarmupRestarts(_LRScheduler):
         self.cur_cycle_steps = first_cycle_steps # first cycle step size
         self.cycle = 0 # cycle count
         self.step_in_cycle = last_epoch # step size of the current cycle
+        self.optimizer = optimizer
         
         super(CosineAnnealingWarmupRestarts, self).__init__(optimizer, last_epoch)
         
         # set learning rate min_lr
         self.init_lr()
+    @property
+    def lr(self):
+        return self.get_lr()[0]
     
     def init_lr(self):
         self.base_lrs = []
@@ -59,6 +63,8 @@ class CosineAnnealingWarmupRestarts(_LRScheduler):
                     * (1 + math.cos(math.pi * (self.step_in_cycle-self.warmup_steps) \
                                     / (self.cur_cycle_steps - self.warmup_steps))) / 2
                     for base_lr in self.base_lrs]
+    def zero_grad(self):
+        self.optimizer.zero_grad()
 
     def step(self, epoch=None):
         if epoch is None:

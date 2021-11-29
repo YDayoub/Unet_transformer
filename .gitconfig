@@ -1,3 +1,5 @@
 [user]
 	email = yazandayoubsyria@gmail.com
 	name = YDayoub
+[credential]
+	helper = cache
