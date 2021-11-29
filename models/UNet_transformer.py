@@ -29,24 +29,24 @@ class UTransformer(nn.Module):
         self.embedding = nn.Embedding(ntokens, d_model)
         self.dropout = nn.Dropout(dropout)
         self.d_model = d_model
-        self.bottleneck0 =  nn.Sequential(
-            nn.Linear(d_model, dim_feedforward), nn.Dropout(dropout))
-        self.act = get_activation_fn(activation)
-        self.bottleneck1 = nn.Linear(dim_feedforward, d_model)
+        # self.bottleneck0 =  nn.Sequential(
+        #     nn.Linear(d_model, d_model), nn.Dropout(dropout))
+        # self.act = get_activation_fn(activation)
+        # self.bottleneck1 = nn.Linear(d_model, d_model)
         self.norm = nn.LayerNorm(d_model)
         self.decoder = nn.Linear(d_model, ntokens)
         self.init_weights()
 
     def init_weights(self) -> None:
-        # def initialization(m):
-        #     if isinstance(m, nn.Linear):
-        #         torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
-        #         m.bias.data.fill_(0.01)
-        # self.apply(initialization)
-        initrange = 0.1
-        self.embedding.weight.data.uniform_(-initrange, initrange)
-        self.decoder.bias.data.zero_()
-        self.decoder.weight.data.uniform_(-initrange, initrange)
+        def initialization(m):
+            if isinstance(m, nn.Linear):
+                torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
+                m.bias.data.fill_(0.01)
+        self.apply(initialization)
+        # initrange = 0.1
+        # self.embedding.weight.data.uniform_(-initrange, initrange)
+        # self.decoder.bias.data.zero_()
+        # self.decoder.weight.data.uniform_(-initrange, initrange)
 
     def forward(self, src: Tensor,  src_mask: Tensor) -> Tensor:
         """
@@ -60,12 +60,13 @@ class UTransformer(nn.Module):
         #src = self.embedding(src) * math.sqrt(self.d_model)
         src = self.embedding(src) 
         memory = self.pos_encoder(src)
-        #memory = self.dropout(memory)
+        memory = self.dropout(memory)
         encoder_outputs = []
         for layer in self.transformer_encoder:
             memory = layer(memory, src_mask=src_mask)
             encoder_outputs.append(memory)
-        output = self.norm(self.bottleneck1(self.act(self.bottleneck0(memory)))+memory)
+        #output = self.norm(self.bottleneck1(self.act(self.bottleneck0(memory)))+memory)
+        output = memory
         for layer in self.transformer_decoder:
           output = layer(output, encoder_outputs.pop(),\
                                                  memory_mask=src_mask, tgt_mask=src_mask)              

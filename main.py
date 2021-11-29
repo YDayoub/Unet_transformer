@@ -2,6 +2,8 @@ import torch
 from torch import nn, Tensor
 import torch.nn.functional as F
 from optimizers.NoamOptimizer import NoamOpt
+from optimizers.cos_sch_warmupR import CosineWarmUp
+from optimizers.linear_warmup import linearcycleWarmup
 from models.UNet_transformer import UTransformer
 from models.vanilla_transformer import VanillaTransformer
 from datasets.WIKI103 import wiki103
@@ -64,6 +66,7 @@ def main():
     val_data = batchify(val_data, eval_batch_size, device)
     test_data = batchify(test_data, eval_batch_size, device)
     ntokens = ds.get_vocab_len()  # size of source vocabulary
+    print('vocab: {} tokens'.format(ntokens))
 
     if config['model'] == 'U-transformer':
         model = UTransformer(ntokens=ntokens, d_model=d_model, nhead=nhead,
@@ -82,9 +85,21 @@ def main():
     print('-' * 89)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = NoamOpt(d_model, 1, 8000,
-                        torch.optim.RAdam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9, weight_decay=1e-5))
+    opt = torch.optim.RAdam(model.parameters(),\
+         lr=0, betas=(0.9, 0.98), eps=1e-9, weight_decay=1e-5)
+    #optimizer = NoamOpt(model_size=d_model, factor=1, warmup=8000, optimizer=opt)
     #optimizer = torch.optim.RAdam(model.parameters(), lr=1.6e-6, weight_decay=1e-3)
+    # optimizer = CosineWarmUp(torch.optim.RAdam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9,\
+    #      weight_decay=1e-5),T_0 = 868, T_mult=1, eta_min = 3e-4)
+    #print('total_steps: {}'.format(len(train_data)//bptt))
+    total_steps = epochs*(len(train_data)//bptt+1)
+    # optimizer = linearcycleWarmup(optimizer=opt, total_steps=5*len(train_data)//bptt,\
+    #      pct_start=0.8, anneal_strategy='linear', three_phase=True,\
+    #           max_lr=1e-3, steps_per_epoch=len(train_data)//bptt)
+    optimizer = linearcycleWarmup(optimizer=opt, total_steps=total_steps,\
+        pct_start=0.3, anneal_strategy='linear', three_phase=True,\
+            max_lr=1e-3)
+    
 
     trainLoop(model, epochs, train_data, val_data, optimizer,
               criterion, device, bptt, clip_grad_norm, ntokens,  save_model=False)
