@@ -7,6 +7,8 @@ class linearcycleWarmup:
         self.epochs = 1
         self.parameters = kwargs
         self.max_lr = self.parameters['max_lr']
+        self.threshold = int(kwargs['total_steps']*kwargs['pct_start'])
+        self.min_lr = 0.00012
 
 
     @property
@@ -16,6 +18,10 @@ class linearcycleWarmup:
     def step(self):
         
         self.optimizer.step()
+        self.counter+=1
+        if self.counter>self.threshold:
+            if self.lr<=self.min_lr:
+                return
         self.schedular.step()
         # self.counter+=1
         # if self.counter >= self.parameters['total_steps']:

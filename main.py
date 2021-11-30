@@ -36,6 +36,8 @@ def main():
     eval_batch_size = eval_config['batch_size']
     epochs = training_config['n_epochs']
     bptt = training_config['bptt']
+    use_aux = training_config['use_aux']
+    weight_aux = training_config['weight_aux']
     # gradient norm clipping value
     clip_grad_norm = training_config['clip_grad_norm']
     d_model = model_config['d_model']  # embedding dimension
@@ -46,6 +48,7 @@ def main():
     nhead = model_config['nhead']  # number of heads in nn.MultiheadAttention
     dropout = model_config['dropout']  # dropout probability
     activation = model_config['activation']  # activation function
+
     if dataset_config['tokenizer'] == 'char':
         if dataset_config['dataset'] == 'wiki2':
             ds = wiki2(char=True)
@@ -71,7 +74,8 @@ def main():
     if config['model'] == 'U-transformer':
         model = UTransformer(ntokens=ntokens, d_model=d_model, nhead=nhead,
                              dim_feedforward=dim_feedforward,
-                             nlayers=nlayers, dropout=dropout, activation=activation).to(device)
+                             nlayers=nlayers, dropout=dropout, activation=activation,use_aux=use_aux\
+                                 , weight=weight_aux).to(device)
     elif config['model'] == 'vanilla-transformer':
         model = VanillaTransformer(ntokens=ntokens, d_model=d_model, nhead=nhead,
                                    dim_feedforward=dim_feedforward,
@@ -81,7 +85,7 @@ def main():
                                for p in model.parameters() if p.requires_grad)
     print('-' * 89)
     print(
-        f"## Training model with {pytorch_total_params/1000000:0.2F}M trainable parameters.")
+        f"## Training model with {pytorch_total_params/1000000:0.2F}M trainable parameters. ##")
     print('-' * 89)
 
     criterion = nn.CrossEntropyLoss()
@@ -89,6 +93,8 @@ def main():
     total_steps = epochs*(steps_per_epoch)
     opt = torch.optim.RAdam(model.parameters(),\
          lr=0, betas=(0.9, 0.98), eps=1e-9, weight_decay=1e-5)
+    # opt = torch.optim.RAdam(model.parameters(),\
+    #      lr=0, betas=(0.9, 0.98), eps=1e-9)
     #optimizer = NoamOpt(model_size=d_model, factor=1, warmup=8000, optimizer=opt)
     #optimizer = torch.optim.RAdam(model.parameters(), lr=1.6e-6, weight_decay=1e-3)
     # optimizer = CosineAnnealingWarmupRestarts(opt,\
@@ -103,7 +109,8 @@ def main():
     
 
     trainLoop(model, epochs, train_data, val_data, optimizer,
-              criterion, device, bptt, clip_grad_norm, ntokens,  save_model=False)
+              criterion, device, bptt, clip_grad_norm, ntokens,  save_model=False\
+                  ,adaptive_dropout = True)
 
     test(model, criterion, test_data, ntokens, bptt, device)
 

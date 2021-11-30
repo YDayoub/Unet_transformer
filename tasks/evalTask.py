@@ -12,7 +12,10 @@ def evaluate(model, criterion, eval_data, ntokens, bptt, device) -> float:
             batch_size = data.size(0)
             if batch_size != bptt:
                 src_mask = src_mask[:batch_size, :batch_size]
-            output = model(data, src_mask)
+            if model.use_aux:
+                output, _ = model(data, src_mask)
+            else:
+                output = model(data, src_mask)
             output_flat = output.view(-1, ntokens)
             total_loss += batch_size * criterion(output_flat, targets).item()
     return total_loss / (len(eval_data) - 1)

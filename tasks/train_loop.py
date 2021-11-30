@@ -7,11 +7,16 @@ import copy
 import os
 
 
-def trainLoop(model, epochs, train_data, val_data, optimizer, criterion, device, bptt, clip_gradient, ntokens, save_model=True):
+def trainLoop(model, epochs, train_data, val_data, optimizer, criterion,\
+     device, bptt, clip_gradient, ntokens, save_model=True, adaptive_dropout=False):
     best_val_loss = float('inf')
     best_model = None
     name = time.strftime('state_dict_%Y_%m_%d-%H_%M_%S.pt')
     for epoch in range(1, epochs + 1):
+        p  = min(1.5*epoch/100.0,0.2)
+        if adaptive_dropout:
+            model.set_dropout(p)
+            print('dropout in epoch {:2d}: {:.4f}'.format(epoch, p))
         epoch_start_time = time.time()
         model = train(epoch, model, optimizer, criterion,
                       train_data, ntokens, bptt, clip_gradient, device)

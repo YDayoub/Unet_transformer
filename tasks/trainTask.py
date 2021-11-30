@@ -18,8 +18,14 @@ def train(epoch, model, optimizer, criterion, train_data,\
         batch_size = data.size(0)
         if batch_size != bptt:  # only on last batch
             src_mask = src_mask[:batch_size, :batch_size]
-        output = model(data, src_mask)
-        loss = criterion(output.view(-1, ntokens), targets)
+        if model.use_aux:
+            output, aux_output = model(data, src_mask)
+            main_loss = criterion(output.view(-1, ntokens), targets)
+            aux_loss = criterion(aux_output.view(-1, ntokens), targets)
+            loss = main_loss*(1-model.aux_weight) + model.aux_weight * aux_loss
+        else:
+            output = model(data, src_mask)
+            loss = criterion(output.view(-1, ntokens), targets)
         optimizer.zero_grad()
         loss.backward()
         if clip_gradient>0:
