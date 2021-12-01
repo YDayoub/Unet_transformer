@@ -110,7 +110,7 @@ def main():
 
     trainLoop(model, epochs, train_data, val_data, optimizer,
               criterion, device, bptt, clip_grad_norm, ntokens,  save_model=False\
-                  ,adaptive_dropout = True)
+                  ,adaptive_dropout = True, logging=True)
 
     test(model, criterion, test_data, ntokens, bptt, device)
 

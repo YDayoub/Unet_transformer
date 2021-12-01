@@ -20,12 +20,12 @@ class UTransformer(nn.Module):
         self.pos_encoder = PositionalEncoding(d_model, dropout)
         self.transformer_encoder = nn.ModuleList([TransformerEncoderLayer(d_model=d_model, nhead=nhead, \
                                                                           dim_feedforward=dim_feedforward,\
-                                                                          dropout=dropout, activation=activation)\
+                                                                          dropout=dropout, activation=activation, norm_first=True)\
                                                    for _ in range(nlayers)])
 
         self.transformer_decoder = nn.ModuleList([TransformerDecoderLayer(d_model=d_model, nhead=nhead,\
                                                                           dim_feedforward=dim_feedforward,\
-                                                                          dropout=dropout, activation=activation)\
+                                                                          dropout=dropout, activation=activation, norm_first=True)\
                                                    for _ in range(nlayers)])
         self.embedding = nn.Embedding(ntokens, d_model)
         self.dropout = nn.Dropout(dropout)
