@@ -36,7 +36,8 @@ def trainLoop(model, epochs, train_data, val_data, optimizer, criterion,\
         print(f'| end of epoch {epoch:3d} | time: {elapsed:5.2f}s | '
               f'valid loss {val_loss:5.5f} | valid ppl {val_ppl:8.2f}')
         print('-' * 89)
-        if writer is not None:
+        if writer:
+            print('wriiiiiter')
             writer.add_scalar('val/loss', val_loss, epoch)
             writer.add_scalar('val/ppl', val_ppl, epoch)
             for name, weight in model.named_parameters():
@@ -51,6 +52,8 @@ def trainLoop(model, epochs, train_data, val_data, optimizer, criterion,\
         if save_model:
             fpath = os.path.join('checkpoints', name)
             torch.save(best_model.state_dict(), fpath)
+    model = best_model
+    return model
 
 
 # print('-' * 89)

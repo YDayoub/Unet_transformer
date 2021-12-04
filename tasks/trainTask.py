@@ -25,15 +25,16 @@ def train(epoch, model, optimizer, criterion, train_data,\
             main_loss = criterion(output.view(-1, ntokens), targets)
             aux_loss = criterion(aux_output.view(-1, ntokens), targets)        
             loss = main_loss*(1-model.aux_weight) + model.aux_weight * aux_loss
-            if writer is not None:
+            if writer:
                 writer.add_scalar('train/main_loss', main_loss.item(), curent_index)
                 writer.add_scalar('train/aux_loss', aux_loss.item(), curent_index)
                 writer.add_scalar('train/loss', loss.item(), curent_index)
                 writer.add_scalar('train/ppl', math.exp(main_loss.item()), curent_index)
+                
         else:
             output = model(data, src_mask)
             loss = criterion(output.view(-1, ntokens), targets)
-            if writer is not None:
+            if writer:
                 writer.add_scalar('train/loss', loss.item(), curent_index)
                 writer.add_scalar('train/ppl', math.exp(loss.item()), curent_index)
         optimizer.zero_grad()
@@ -41,11 +42,11 @@ def train(epoch, model, optimizer, criterion, train_data,\
         if clip_gradient>0:
             torch.nn.utils.clip_grad_norm_(model.parameters(), clip_gradient)
         optimizer.step()
-        writer.add_scalar('lr', optimizer.lr, num_batches*epoch+batch)    
         total_loss += loss.item()
+        if writer:
+            writer.add_scalar('lr', optimizer.lr, num_batches*epoch+batch)    
         if batch % log_interval == 0 and batch > 0:
             lr = optimizer.lr
-            #lr = 5e-5
             ms_per_batch = (time.time() - start_time) * 1000 / log_interval
             cur_loss = total_loss / log_interval
             ppl = math.exp(cur_loss)

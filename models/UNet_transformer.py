@@ -30,27 +30,32 @@ class UTransformer(nn.Module):
         self.embedding = nn.Embedding(ntokens, d_model)
         self.dropout = nn.Dropout(dropout)
         self.d_model = d_model
+        self.decoder = nn.Linear(d_model, ntokens)
+        self.use_aux = use_aux
+        if self.use_aux:
+            print('-----------using_aux_output----------------')
+            self.aux_weight = weight
+            self.decoder_aux = nn.Linear(d_model, ntokens)
+        self.init_weights()
         # self.bottleneck0 =  nn.Sequential(
         #     nn.Linear(d_model, d_model), nn.Dropout(dropout))
         # self.act = get_activation_fn(activation)
         # self.bottleneck1 = nn.Linear(d_model, d_model)
-        self.decoder = nn.Linear(d_model, ntokens)
-        self.use_aux = use_aux
-        if self.use_aux:
-            self.aux_weight = weight
-            self.decoder_aux = nn.Linear(d_model, ntokens)
-        self.init_weights()
+        #self.decoder = nn.Linear(d_model, ntokens)
+
+        #self.init_weights()
 
     def init_weights(self) -> None:
-        def initialization(m):
-            if isinstance(m, nn.Linear):
-                torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
-                m.bias.data.fill_(0.01)
-        self.apply(initialization)
-        # initrange = 0.1
-        # self.embedding.weight.data.uniform_(-initrange, initrange)
-        # self.decoder.bias.data.zero_()
-        # self.decoder.weight.data.uniform_(-initrange, initrange)
+        # def initialization(m):
+        #     if isinstance(m, nn.Linear):
+        #         torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
+        #         m.bias.data.fill_(0.01)
+        # self.apply(initialization)
+        # torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
+        initrange = 0.1
+        self.embedding.weight.data.uniform_(-initrange, initrange)
+        self.decoder.bias.data.zero_()
+        self.decoder.weight.data.uniform_(-initrange, initrange)
 
     def set_dropout(self, drop_rate=0.1)-> None:
         def set_dropout_rec(model, p):
@@ -69,8 +74,8 @@ class UTransformer(nn.Module):
         Returns:
             output Tensor of shape [seq_len, batch_size, ntoken]
         """
-        #src = self.embedding(src) * math.sqrt(self.d_model)
-        src = self.embedding(src) 
+        src = self.embedding(src) * math.sqrt(self.d_model)
+        #src = self.embedding(src) 
         memory = self.pos_encoder(src)
         memory = self.dropout(memory)
         encoder_outputs = []

@@ -95,7 +95,7 @@ def main():
          lr=0, betas=(0.9, 0.98), eps=1e-9, weight_decay=1e-5)
     # opt = torch.optim.RAdam(model.parameters(),\
     #      lr=0, betas=(0.9, 0.98), eps=1e-9)
-    #optimizer = NoamOpt(model_size=d_model, factor=1, warmup=8000, optimizer=opt)
+    optimizer = NoamOpt(model_size=d_model, factor=1, warmup=8000, optimizer=opt)
     #optimizer = torch.optim.RAdam(model.parameters(), lr=1.6e-6, weight_decay=1e-3)
     # optimizer = CosineAnnealingWarmupRestarts(opt,\
     #     first_cycle_steps=3*steps_per_epoch, cycle_mult=1.0, max_lr=0.001, min_lr=1e-6, warmup_steps=2*steps_per_epoch, gamma=0.5)
@@ -103,14 +103,14 @@ def main():
     # optimizer = linearcycleWarmup(optimizer=opt, total_steps=5*len(train_data)//bptt,\
     #      pct_start=0.8, anneal_strategy='linear', three_phase=True,\
     #           max_lr=1e-3, steps_per_epoch=len(train_data)//bptt)
-    optimizer = linearcycleWarmup(optimizer=opt, total_steps=total_steps,\
-        pct_start=0.3, anneal_strategy='linear', three_phase=True,\
-            max_lr=1e-3)
+    # optimizer = linearcycleWarmup(optimizer=opt, total_steps=total_steps,\
+    #     pct_start=0.3, anneal_strategy='linear', three_phase=True,\
+    #         max_lr=1e-3)
     
 
-    trainLoop(model, epochs, train_data, val_data, optimizer,
+    model = trainLoop(model, epochs, train_data, val_data, optimizer,
               criterion, device, bptt, clip_grad_norm, ntokens,  save_model=False\
-                  ,adaptive_dropout = True, logging=True)
+                  ,adaptive_dropout = False, logging=False)
 
     test(model, criterion, test_data, ntokens, bptt, device)
 
