@@ -14,24 +14,25 @@ def get_activation_fn(activation):
 class UTransformer(nn.Module):
 
     def __init__(self, ntokens: int,  d_model: int, nhead: int, dim_feedforward: int,
-                 nlayers: int, dropout: float = 0.5, activation: str = 'relu', use_aux = False, weight=None, *args, **kwargs):
+                 nlayers: int, drop_rate: float = 0.5, activation: str = 'relu', use_aux = False, weight=None, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self.model_type = 'U-transformer'
-        self.pos_encoder = PositionalEncoding(d_model, dropout)
+        self.pos_encoder = PositionalEncoding(d_model, drop_rate)
         self.transformer_encoder = nn.ModuleList([TransformerEncoderLayer(d_model=d_model, nhead=nhead, \
                                                                           dim_feedforward=dim_feedforward,\
-                                                                          dropout=dropout, activation=activation, norm_first=True)\
+                                                                          dropout=drop_rate, activation=activation, norm_first=True)\
                                                    for _ in range(nlayers)])
 
         self.transformer_decoder = nn.ModuleList([TransformerDecoderLayer(d_model=d_model, nhead=nhead,\
                                                                           dim_feedforward=dim_feedforward,\
-                                                                          dropout=dropout, activation=activation, norm_first=True)\
+                                                                          dropout=drop_rate, activation=activation, norm_first=True)\
                                                    for _ in range(nlayers)])
         self.embedding = nn.Embedding(ntokens, d_model)
-        self.dropout = nn.Dropout(dropout)
+        self.dropout = nn.Dropout(drop_rate)
         self.d_model = d_model
         self.decoder = nn.Linear(d_model, ntokens)
         self.use_aux = use_aux
+        self.dropout_val = drop_rate
         if self.use_aux:
             print('-----------using_aux_output----------------')
             self.aux_weight = weight

@@ -77,12 +77,12 @@ def main():
     if config['model'] == 'U-transformer':
         model = UTransformer(ntokens=ntokens, d_model=d_model, nhead=nhead,
                              dim_feedforward=dim_feedforward,
-                             nlayers=nlayers, dropout=dropout, activation=activation,use_aux=use_aux\
+                             nlayers=nlayers, drop_rate=dropout, activation=activation,use_aux=use_aux\
                                  , weight=weight_aux).to(device)
     elif config['model'] == 'vanilla-transformer':
         model = VanillaTransformer(ntokens=ntokens, d_model=d_model, nhead=nhead,
                                    dim_feedforward=dim_feedforward,
-                                   nlayers=nlayers, dropout=dropout, activation=activation).to(device)
+                                   nlayers=nlayers, drop_rate=dropout, activation=activation).to(device)
 
     pytorch_total_params = sum(p.numel()
                                for p in model.parameters() if p.requires_grad)
@@ -120,7 +120,8 @@ def main():
         optimizer = linearcycleWarmup(**schedular_args, optimizer=opt)
 
     log_dir = time.strftime('logging/{}_%Y_%m_%d-%H_%M_%S'.format(config['model']))
-    logging = False
+    logging = True
+
     
 
     model, train_loss, train_ppl, val_loss, val_ppl = trainLoop(model, epochs, train_data, val_data, optimizer,

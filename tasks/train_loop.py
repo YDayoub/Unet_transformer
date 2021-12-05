@@ -14,10 +14,8 @@ def trainLoop(model, epochs, train_data, val_data, optimizer, criterion,\
     best_val_loss = float('inf')
     best_model = None
     name = time.strftime('state_dict_%Y_%m_%d-%H_%M_%S.pt')
-    if logging:
-        writer = SummaryWriter(log_dir=log_dir)
-    else:
-        writer = None
+    writer = SummaryWriter(log_dir=log_dir) if logging else None
+
     for epoch in range(1, epochs + 1):
         p  = min(1.5*epoch/100.0,0.2)
         if adaptive_dropout:
@@ -37,12 +35,14 @@ def trainLoop(model, epochs, train_data, val_data, optimizer, criterion,\
               f'valid loss {val_loss:5.5f} | valid ppl {val_ppl:8.2f}')
         print('-' * 89)
         if writer:
-            print('wriiiiiter')
+            print('train_loop/logging')
             writer.add_scalar('val/loss', val_loss, epoch)
             writer.add_scalar('val/ppl', val_ppl, epoch)
-            for name, weight in model.named_parameters():
-                writer.add_histogram(name,weight, epoch)
-                writer.add_histogram(f'{name}.grad',weight.grad, epoch)
+            writer.add_histogram('decoder/weights', model.decoder.weight, epoch)
+            writer.add_histogram('decoder/bias', model.decoder.bias, epoch)
+            # for name, weight in model.named_parameters():
+            #     writer.add_histogram(name,weight, epoch)
+            #     writer.add_histogram(f'{name}.grad',weight.grad, epoch)
 
 
 

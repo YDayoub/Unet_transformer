@@ -226,3 +226,42 @@ python
 python3
 pip install -U spacy
 python3 main.py --config /home/admin/configs/config_utr.yaml
+git add .
+git commit -m 'testing_code'
+git push -u origin 
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.ya
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+clear
+git add .
+git commit -m 'add_csv_logger'
+git push -u origin

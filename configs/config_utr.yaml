@@ -10,7 +10,8 @@ dataset_config:
   tokenizer: 'spacy' # spacy, basic_english, char
   dataset: 'wiki2' # wiki2, wiki103
 training:
-  n_epochs : 50
+  opt: 'linear' # linear, Noam
+  n_epochs : 3
   batch_size:  20
   bptt: 128
   clip_grad_norm: 0.5 

@@ -13,7 +13,6 @@ def train(epoch, model, optimizer, criterion, train_data,\
     start_time = time.time()
     src_mask = generate_square_subsequent_mask(bptt).to(device)
     num_batches = len(train_data) // bptt
-    debug_loss = 0
     
     for batch, i in enumerate(range(0, train_data.size(0) - 1, bptt)):
         data, targets = get_batch(train_data, i, bptt)
@@ -25,27 +24,31 @@ def train(epoch, model, optimizer, criterion, train_data,\
             output, aux_output = model(data, src_mask)
             main_loss = criterion(output.view(-1, ntokens), targets)
             aux_loss = criterion(aux_output.view(-1, ntokens), targets)        
-            loss = main_loss*(1-model.aux_weight) + model.aux_weight * aux_loss
-            if writer:
-                writer.add_scalar('train/main_loss', main_loss.item(), curent_index)
-                writer.add_scalar('train/aux_loss', aux_loss.item(), curent_index)
-                writer.add_scalar('train/loss', loss.item(), curent_index)
-                writer.add_scalar('train/ppl', math.exp(main_loss.item()), curent_index)
-                
+            loss = main_loss*(1-model.aux_weight) + model.aux_weight * aux_loss                
         else:
             output = model(data, src_mask)
             loss = criterion(output.view(-1, ntokens), targets)
-            if writer:
-                writer.add_scalar('train/loss', loss.item(), curent_index)
-                writer.add_scalar('train/ppl', math.exp(loss.item()), curent_index)
+
         optimizer.zero_grad()
         loss.backward()
         if clip_gradient>0:
             torch.nn.utils.clip_grad_norm_(model.parameters(), clip_gradient)
         optimizer.step()
         total_loss += loss.item()
-        if writer:
-            writer.add_scalar('lr', optimizer.lr, num_batches*epoch+batch)    
+        if model.use_aux and writer:
+            writer.add_scalars('train/loss', {'main_loss': main_loss.item(),\
+                'aux_loss': aux_loss.item(), 'loss': loss.item()}, curent_index)
+            writer.add_scalar('lr', optimizer.lr, curent_index)
+            writer.add_scalars('train/ppl', {'train_ppl/100':  math.exp(main_loss.item())/100, 'lr': optimizer.lr, 'dropout': model.dropout_val}, curent_index)
+
+        elif writer:
+            writer.add_scalar('lr', optimizer.lr, curent_index)
+            writer.add_scalar('train/loss', loss.item(), curent_index)
+            writer.add_scalars('train/ppl', {'train_ppl/100':  math.exp(loss.item())/100,\
+                             'lr': optimizer.lr, 'dropout': model.dropout_val}, curent_index)
+
+
+  
         if batch % log_interval == 0 and batch > 0:
             lr = optimizer.lr
             ms_per_batch = (time.time() - start_time) * 1000 / log_interval

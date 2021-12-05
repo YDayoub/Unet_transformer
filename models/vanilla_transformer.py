@@ -16,25 +16,26 @@ def get_activation_fn(activation):
 class VanillaTransformer(nn.Module):
 
     def __init__(self, ntokens: int,  d_model: int, nhead: int, dim_feedforward: int,
-                 nlayers: int, dropout: float = 0.5,\
+                 nlayers: int, drop_rate: float = 0.5,\
                       activation: str = 'relu', use_aux = False, weight=None, *args, **kwargs):
         super().__init__( *args, **kwargs)
         self.model_type = 'Vanilla Transformer'
-        self.pos_encoder = PositionalEncoding(d_model, dropout)
+        self.pos_encoder = PositionalEncoding(d_model, drop_rate)
         self.transformer_encoder = nn.ModuleList([TransformerEncoderLayer(d_model=d_model, nhead=nhead,
                                                                           dim_feedforward=dim_feedforward,
-                                                                          dropout=dropout, activation=activation)
+                                                                          dropout=drop_rate, activation=activation)
                                                   for _ in range(nlayers)])
 
         self.transformer_decoder = nn.ModuleList([TransformerDecoderLayer(d_model=d_model, nhead=nhead,
                                                                           dim_feedforward=dim_feedforward,
-                                                                          dropout=dropout, activation=activation)
+                                                                          dropout=drop_rate, activation=activation)
                                                   for _ in range(nlayers)])
         self.embedding = nn.Embedding(ntokens, d_model)
-        self.dropout = nn.Dropout(dropout)
+        self.dropout = nn.Dropout(drop_rate)
         self.d_model = d_model
         self.decoder = nn.Linear(d_model, ntokens)
         self.use_aux = use_aux
+        self.dropout_val = drop_rate
         if self.use_aux:
             self.aux_weight = weight
             self.decoder_aux = nn.Linear(d_model, ntokens)
@@ -52,6 +53,7 @@ class VanillaTransformer(nn.Module):
                 if isinstance(child, torch.nn.Dropout):
                     child.p = drop_rate
                 set_dropout_rec(child, p)
+        self.dropout_val = drop_rate
         set_dropout_rec(self, drop_rate)
 
     def forward(self, src: Tensor,  src_mask: Tensor) -> Tensor:
