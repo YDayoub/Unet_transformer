@@ -35,7 +35,6 @@ def trainLoop(model, epochs, train_data, val_data, optimizer, criterion,\
               f'valid loss {val_loss:5.5f} | valid ppl {val_ppl:8.2f}')
         print('-' * 89)
         if writer:
-            print('train_loop/logging')
             writer.add_scalar('val/loss', val_loss, epoch)
             writer.add_scalar('val/ppl', val_ppl, epoch)
             writer.add_histogram('decoder/weights', model.decoder.weight, epoch)

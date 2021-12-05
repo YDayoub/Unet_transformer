@@ -42,11 +42,15 @@ class VanillaTransformer(nn.Module):
         self.init_weights()
 
     def init_weights(self) -> None:
-        def initialization(m):
-            if isinstance(m, nn.Linear):
-                torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
-                m.bias.data.fill_(0.01)
-        self.apply(initialization)
+        # def initialization(m):
+        #     if isinstance(m, nn.Linear):
+        #         torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
+        #         m.bias.data.fill_(0.01)
+        # self.apply(initialization)
+        initrange = 0.1
+        self.embedding.weight.data.uniform_(-initrange, initrange)
+        self.decoder.bias.data.zero_()
+        self.decoder.weight.data.uniform_(-initrange, initrange)
     def set_dropout(self, drop_rate=0.1)-> None:
         def set_dropout_rec(model, p):
             for _, child in model.named_children():
