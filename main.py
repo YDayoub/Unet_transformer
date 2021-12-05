@@ -14,6 +14,8 @@ from torchtext.data.utils import get_tokenizer
 from functools import partial
 from tasks.testTask import test
 import argparse
+from tasks.csv_logger import log_data
+import time
 
 
 def main():
@@ -27,6 +29,7 @@ def main():
     except Exception as e:
         print('Error', e)
         exit(0)
+
     model_config = config['model_config']
     training_config = config['training']
     eval_config = config['eval']
@@ -91,11 +94,52 @@ def main():
     criterion = nn.CrossEntropyLoss()
     steps_per_epoch = len(train_data)//bptt+1
     total_steps = epochs*(steps_per_epoch)
+    opt_args = {
+         'lr':0,
+        'betas':(0.9, 0.98), 'eps':1e-9, 'weight_decay':1e-5
+    }
+    Noam_args ={
+        'model_size':d_model,
+        'factor':1, 'warmup':8000
+    }
+    linear_args = {
+        'total_steps': total_steps,
+        'pct_start':0.3, 'anneal_strategy':'linear',
+        'three_phase':True, 'max_lr':1e-3
+    }
+
+
+
     opt = torch.optim.RAdam(model.parameters(),\
-         lr=0, betas=(0.9, 0.98), eps=1e-9, weight_decay=1e-5)
+         **opt_args)
+    if training_config['opt'] == 'Noam':
+        schedular_args = Noam_args
+        optimizer = NoamOpt(**schedular_args, optimizer=opt)
+    elif training_config['opt'] == 'linear':
+        schedular_args = linear_args
+        optimizer = linearcycleWarmup(**schedular_args, optimizer=opt)
+
+    log_dir = time.strftime('logging/{}_%Y_%m_%d-%H_%M_%S'.format(config['model']))
+    logging = False
+    
+
+    model, train_loss, train_ppl, val_loss, val_ppl = trainLoop(model, epochs, train_data, val_data, optimizer,
+              criterion, device, bptt, clip_grad_norm, ntokens,  save_model=False\
+                  ,adaptive_dropout = False, logging=logging, log_dir=log_dir)
+
+    test_loss, test_ppl = test(model, criterion, test_data, ntokens, bptt, device)
+
+    config['opt_args'] = str(opt_args)
+    config['schedular_args'] = str(schedular_args)
+    config['log_dir'] = log_dir if logging else ""
+    config['results'] = 'test_loss {:.3f}, val_loss {:.3f}, train_loss {:.3f}\
+        test_ppl {:.3f}, val_ppl {:.3f}, train_ppl {:.3f}'.format(test_loss, val_loss, train_loss,\
+            test_ppl, val_ppl, train_ppl)
+    log_data('logging/log.csv', config)
+
+
     # opt = torch.optim.RAdam(model.parameters(),\
     #      lr=0, betas=(0.9, 0.98), eps=1e-9)
-    optimizer = NoamOpt(model_size=d_model, factor=1, warmup=8000, optimizer=opt)
     #optimizer = torch.optim.RAdam(model.parameters(), lr=1.6e-6, weight_decay=1e-3)
     # optimizer = CosineAnnealingWarmupRestarts(opt,\
     #     first_cycle_steps=3*steps_per_epoch, cycle_mult=1.0, max_lr=0.001, min_lr=1e-6, warmup_steps=2*steps_per_epoch, gamma=0.5)
@@ -103,16 +147,10 @@ def main():
     # optimizer = linearcycleWarmup(optimizer=opt, total_steps=5*len(train_data)//bptt,\
     #      pct_start=0.8, anneal_strategy='linear', three_phase=True,\
     #           max_lr=1e-3, steps_per_epoch=len(train_data)//bptt)
-    # optimizer = linearcycleWarmup(optimizer=opt, total_steps=total_steps,\
-    #     pct_start=0.3, anneal_strategy='linear', three_phase=True,\
-    #         max_lr=1e-3)
+    #optimizer = linearcycleWarmup(optimizer=opt, **linear_args)
+
+  
     
-
-    model = trainLoop(model, epochs, train_data, val_data, optimizer,
-              criterion, device, bptt, clip_grad_norm, ntokens,  save_model=False\
-                  ,adaptive_dropout = False, logging=False)
-
-    test(model, criterion, test_data, ntokens, bptt, device)
 
 
 if __name__ == '__main__':

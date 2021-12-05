@@ -9,12 +9,12 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 def trainLoop(model, epochs, train_data, val_data, optimizer, criterion,\
-     device, bptt, clip_gradient, ntokens, save_model=True, adaptive_dropout=False, logging=False):
+     device, bptt, clip_gradient, ntokens, save_model=True,\
+          adaptive_dropout=False, logging=False, log_dir=None):
     best_val_loss = float('inf')
     best_model = None
     name = time.strftime('state_dict_%Y_%m_%d-%H_%M_%S.pt')
     if logging:
-        log_dir = time.strftime('logging/logging_%Y_%m_%d-%H_%M_%S')
         writer = SummaryWriter(log_dir=log_dir)
     else:
         writer = None
@@ -24,7 +24,7 @@ def trainLoop(model, epochs, train_data, val_data, optimizer, criterion,\
             model.set_dropout(p)
             print('dropout in epoch {:2d}: {:.4f}'.format(epoch, p))
         epoch_start_time = time.time()
-        model = train(epoch, model, optimizer, criterion,
+        model, train_loss, train_ppl = train(epoch, model, optimizer, criterion,
                       train_data, ntokens, bptt, clip_gradient, device, writer)
         val_loss = evaluate(model, criterion, val_data,
                             ntokens, bptt, device)
@@ -53,7 +53,11 @@ def trainLoop(model, epochs, train_data, val_data, optimizer, criterion,\
             fpath = os.path.join('checkpoints', name)
             torch.save(best_model.state_dict(), fpath)
     model = best_model
-    return model
+    val_loss = evaluate(model, criterion, val_data,
+                            ntokens, bptt, device)
+    val_ppl = math.exp(val_loss)
+
+    return model, train_loss, train_ppl, val_loss, val_ppl
 
 
 # print('-' * 89)

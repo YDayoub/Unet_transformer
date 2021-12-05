@@ -13,6 +13,7 @@ def train(epoch, model, optimizer, criterion, train_data,\
     start_time = time.time()
     src_mask = generate_square_subsequent_mask(bptt).to(device)
     num_batches = len(train_data) // bptt
+    debug_loss = 0
     
     for batch, i in enumerate(range(0, train_data.size(0) - 1, bptt)):
         data, targets = get_batch(train_data, i, bptt)
@@ -55,4 +56,4 @@ def train(epoch, model, optimizer, criterion, train_data,\
                   f'loss {cur_loss:5.2f} | ppl {ppl:8.2f}')
             total_loss = 0
             start_time = time.time()
-    return model
+    return model, cur_loss, math.exp(cur_loss)
