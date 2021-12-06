@@ -13,6 +13,8 @@ def train(epoch, model, optimizer, criterion, train_data,\
     start_time = time.time()
     src_mask = generate_square_subsequent_mask(bptt).to(device)
     num_batches = len(train_data) // bptt
+
+    hist_counter = 0
     
     for batch, i in enumerate(range(0, train_data.size(0) - 1, bptt)):
         data, targets = get_batch(train_data, i, bptt)
@@ -31,6 +33,13 @@ def train(epoch, model, optimizer, criterion, train_data,\
 
         optimizer.zero_grad()
         loss.backward()
+        if (batch % log_interval)== 0 and batch > 0:
+            if writer:
+                step = (num_batches//log_interval)*epoch+hist_counter
+                hist_counter += 1
+                writer.add_histogram('decoder/weights.grad', model.decoder.weight.grad, step)
+                writer.add_histogram('decoder/bias.grad', model.decoder.bias.grad, step)
+        
         if clip_gradient>0:
             torch.nn.utils.clip_grad_norm_(model.parameters(), clip_gradient)
         optimizer.step()
@@ -42,7 +51,7 @@ def train(epoch, model, optimizer, criterion, train_data,\
             writer.add_scalars('train/ppl', {'train_ppl/100':  math.exp(main_loss.item())/100, 'lr': optimizer.lr, 'dropout': model.dropout_val}, curent_index)
 
         elif writer:
-            writer.add_scalar('lr', optimizer.lr, curent_index)
+            writer.add_scalar('train/lr', optimizer.lr, curent_index)
             writer.add_scalar('train/loss', loss.item(), curent_index)
             writer.add_scalars('train/ppl', {'train_ppl/100':  math.exp(loss.item())/100,\
                              'lr': optimizer.lr, 'dropout': model.dropout_val}, curent_index)

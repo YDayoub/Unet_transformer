@@ -29,6 +29,7 @@ def main():
     except Exception as e:
         print('Error', e)
         exit(0)
+    set_seed(42)
 
     model_config = config['model_config']
     training_config = config['training']
@@ -120,13 +121,13 @@ def main():
         optimizer = linearcycleWarmup(**schedular_args, optimizer=opt)
 
     log_dir = time.strftime('logging/{}_%Y_%m_%d-%H_%M_%S'.format(config['model']))
-    logging = True
+    logging = training_config['logging']
 
     
 
     model, train_loss, train_ppl, val_loss, val_ppl = trainLoop(model, epochs, train_data, val_data, optimizer,
-              criterion, device, bptt, clip_grad_norm, ntokens,  save_model=False\
-                  ,adaptive_dropout = False, logging=logging, log_dir=log_dir)
+              criterion, device, bptt, clip_grad_norm, ntokens,  save_model=training_config['save_model']\
+                  ,adaptive_dropout = training_config['adaptive_dropout'], logging=logging, log_dir=log_dir)
 
     test_loss, test_ppl = test(model, criterion, test_data, ntokens, bptt, device)
 

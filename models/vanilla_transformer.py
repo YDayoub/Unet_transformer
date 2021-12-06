@@ -70,7 +70,7 @@ class VanillaTransformer(nn.Module):
             output Tensor of shape [seq_len, batch_size, ntoken]
         """
             
-        src = self.embedding(src) 
+        src = self.embedding(src)*math.sqrt(self.d_model) 
         memory = self.pos_encoder(src)
         memory = self.dropout(memory)
         for layer in self.transformer_encoder:
