@@ -29,6 +29,9 @@ def main():
     except Exception as e:
         print('Error', e)
         exit(0)
+
+
+    #--------------- Reproducibility -------------#
     set_seed(42)
 
     model_config = config['model_config']
