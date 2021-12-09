@@ -265,3 +265,102 @@ clear
 git add .
 git commit -m 'add_csv_logger'
 git push -u origin
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+rm -r logging
+mkdir loggin
+rm -r logging
+mkdir logging
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 tensorboard.main --logdir logging
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+git add .
+git commit -m 'add_Reproducibility'
+git push -u origin
+git add .
+git commit -m 'reformat'
+git push -u origin
+git push -u origin
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+tensorboard --logdir logging
+tensorboard --logdir='logging'
+pip show tensorboard
+ /home/admin/.local/lib/python3.8/site-packages/tensorboard --logdir='logging'
+tensorboard
+python3 -m tensorboard.main --logdir='logging'
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 -m tensorboard.main --logdir='logging'
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 -m tensorboard.main --logdir='logging'
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 -m tensorboard.main --logdir='logging'
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 -m tensorboard.main --logdir='logging'
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 -m tensorboard.main --logdir='logging'
+git add .
+git commit -m 'added_tensorboard
+'
+git push -u origin
+git add .
+git commit -m 'updated_init'
+git push -u origin
+python3 -m tensorboard.main --logdir='logging'
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml

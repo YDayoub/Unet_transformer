@@ -32,7 +32,7 @@ def main():
 
 
     #--------------- Reproducibility -------------#
-    set_seed(42)
+    #set_seed(42)
 
     model_config = config['model_config']
     training_config = config['training']
@@ -45,6 +45,7 @@ def main():
     bptt = training_config['bptt']
     use_aux = training_config['use_aux']
     weight_aux = training_config['weight_aux']
+    use_var_len = training_config['use_var_len']
     # gradient norm clipping value
     clip_grad_norm = training_config['clip_grad_norm']
     d_model = model_config['d_model']  # embedding dimension
@@ -54,6 +55,7 @@ def main():
     nlayers = model_config['nlayers']
     nhead = model_config['nhead']  # number of heads in nn.MultiheadAttention
     dropout = model_config['dropout']  # dropout probability
+    emb_dropout = model_config['emb_dropout']
     activation = model_config['activation']  # activation function
 
     if dataset_config['tokenizer'] == 'char':
@@ -86,13 +88,13 @@ def main():
     elif config['model'] == 'vanilla-transformer':
         model = VanillaTransformer(ntokens=ntokens, d_model=d_model, nhead=nhead,
                                    dim_feedforward=dim_feedforward,
-                                   nlayers=nlayers, drop_rate=dropout, activation=activation).to(device)
+                                   nlayers=nlayers, drop_rate=dropout, emb_dropout=emb_dropout, activation=activation).to(device)
 
     pytorch_total_params = sum(p.numel()
                                for p in model.parameters() if p.requires_grad)
     print('-' * 89)
     print(
-        f"## Training model with {pytorch_total_params/1000000:0.2F}M trainable parameters. ##")
+        f"## Training model with {pytorch_total_params/1000000:0.2F}M trainable parameters for {epochs:3d} epochs. ##")
     print('-' * 89)
 
     criterion = nn.CrossEntropyLoss()
@@ -130,7 +132,8 @@ def main():
 
     model, train_loss, train_ppl, val_loss, val_ppl = trainLoop(model, epochs, train_data, val_data, optimizer,
               criterion, device, bptt, clip_grad_norm, ntokens,  save_model=training_config['save_model']\
-                  ,adaptive_dropout = training_config['adaptive_dropout'], logging=logging, log_dir=log_dir)
+                  ,adaptive_dropout = training_config['adaptive_dropout'], logging=logging, log_dir=log_dir,\
+                      use_var_len=use_var_len)
 
     test_loss, test_ppl = test(model, criterion, test_data, ntokens, bptt, device)
 

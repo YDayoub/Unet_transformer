@@ -10,7 +10,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 def trainLoop(model, epochs, train_data, val_data, optimizer, criterion,\
      device, bptt, clip_gradient, ntokens, save_model=True,\
-          adaptive_dropout=False, logging=False, log_dir=None):
+          adaptive_dropout=False, logging=False, log_dir=None,use_var_len=False):
     best_val_loss = float('inf')
     best_model = None
     name = time.strftime('state_dict_%Y_%m_%d-%H_%M_%S.pt')
@@ -23,7 +23,8 @@ def trainLoop(model, epochs, train_data, val_data, optimizer, criterion,\
             print('dropout in epoch {:2d}: {:.4f}'.format(epoch, p))
         epoch_start_time = time.time()
         model, train_loss, train_ppl = train(epoch, model, optimizer, criterion,
-                      train_data, ntokens, bptt, clip_gradient, device, writer)
+                      train_data, ntokens, bptt, clip_gradient, device, writer,\
+                          use_var_len=use_var_len)
         val_loss = evaluate(model, criterion, val_data,
                             ntokens, bptt, device)
         
@@ -37,8 +38,8 @@ def trainLoop(model, epochs, train_data, val_data, optimizer, criterion,\
         if writer:
             writer.add_scalar('val/loss', val_loss, epoch)
             writer.add_scalar('val/ppl', val_ppl, epoch)
-            writer.add_histogram('decoder/weights', model.decoder.weight, epoch)
-            writer.add_histogram('decoder/bias', model.decoder.bias, epoch)
+            #writer.add_histogram('decoder/weights', model.decoder.weight, epoch)
+            #writer.add_histogram('decoder/bias', model.decoder.bias, epoch)
             # for name, weight in model.named_parameters():
             #     writer.add_histogram(name,weight, epoch)
             #     writer.add_histogram(f'{name}.grad',weight.grad, epoch)

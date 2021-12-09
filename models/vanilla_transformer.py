@@ -4,7 +4,7 @@ from torch import nn, Tensor
 from models.PositionalEncoder import PositionalEncoding
 import torch.nn.functional as F
 from torch.nn import TransformerEncoderLayer, TransformerDecoderLayer
-
+from models.embed_regularize import embedded_dropout
 
 def get_activation_fn(activation):
     if activation == "relu":
@@ -17,7 +17,7 @@ class VanillaTransformer(nn.Module):
 
     def __init__(self, ntokens: int,  d_model: int, nhead: int, dim_feedforward: int,
                  nlayers: int, drop_rate: float = 0.5,\
-                      activation: str = 'relu', use_aux = False, weight=None, *args, **kwargs):
+                      emb_dropout: float = 0.1, activation: str = 'relu', use_aux = False, weight=None, *args, **kwargs):
         super().__init__( *args, **kwargs)
         self.model_type = 'Vanilla Transformer'
         self.pos_encoder = PositionalEncoding(d_model, drop_rate)
@@ -30,11 +30,12 @@ class VanillaTransformer(nn.Module):
                                                                           dim_feedforward=dim_feedforward,
                                                                           dropout=drop_rate, activation=activation)
                                                   for _ in range(nlayers)])
-        self.embedding = nn.Embedding(ntokens, d_model)
+        self.embedding = nn.Embedding(ntokens, d_model, scale_grad_by_freq=True)
         self.dropout = nn.Dropout(drop_rate)
         self.d_model = d_model
         self.decoder = nn.Linear(d_model, ntokens)
         self.use_aux = use_aux
+        self.emb_dropout = emb_dropout
         self.dropout_val = drop_rate
         if self.use_aux:
             self.aux_weight = weight
@@ -70,9 +71,10 @@ class VanillaTransformer(nn.Module):
             output Tensor of shape [seq_len, batch_size, ntoken]
         """
             
-        src = self.embedding(src)*math.sqrt(self.d_model) 
+        src = embedded_dropout(self.embedding,src, \
+            dropout=self.emb_dropout)*math.sqrt(self.d_model) 
         memory = self.pos_encoder(src)
-        memory = self.dropout(memory)
+        #memory = embedded_dropout(self.embedding,src)
         for layer in self.transformer_encoder:
             memory = layer(memory, src_mask=src_mask)
         output = memory
@@ -82,4 +84,5 @@ class VanillaTransformer(nn.Module):
           output = layer(output, memory,\
                                                  memory_mask=src_mask, tgt_mask=src_mask)              
         output = self.decoder(output)
+        #output = torch.matmul(output, self.embedding.weight.t())
         return (output, aux_output) if self.use_aux else output

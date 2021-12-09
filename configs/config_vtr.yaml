@@ -4,7 +4,8 @@ model_config:
   dim_feedforward : 1024 
   nlayers : 2
   nhead : 4 
-  dropout : 0.7 
+  dropout : 0.4 
+  emb_dropout: 0.1
   activation : 'relu'
 dataset_config:
   tokenizer: 'spacy' # spacy, basic_english, char
@@ -14,12 +15,12 @@ training:
   n_epochs : 100
   batch_size:  20
   bptt: 128
-  clip_grad_norm: 1
+  clip_grad_norm: 0.5
   use_aux: False
   adaptive_dropout: False
   save_model: False
-  logging: True
-
+  logging: False
+  use_var_len: True
   weight_aux: 0.1
 eval:
   batch_size: 8 
