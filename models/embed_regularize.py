@@ -2,7 +2,7 @@ import numpy as np
 
 import torch
 
-def embedded_dropout(embed, words, dropout=0.1, scale=None):
+def embedded_dropout(embed, words, dropout=0.1, scale=None): # dropout on weights
   if dropout:
     mask = embed.weight.data.new().resize_((embed.weight.size(0), 1)).bernoulli_(1 - dropout).expand_as(embed.weight) / (1 - dropout)
     masked_embed_weight = mask * embed.weight

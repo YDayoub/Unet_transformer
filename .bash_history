@@ -364,3 +364,111 @@ python3 main.py --config /home/admin/configs/config_vtr.yaml
 python3 main.py --config /home/admin/configs/config_vtr.yaml
 python3 main.py --config /home/admin/configs/config_vtr.yaml
 python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+git add .
+git commit -m 'added var_seq_len'
+git push -u origin
+/usr/bin/python3 /home/admin/models/UNet_transformer.py
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_vtr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+pip install matplotlib
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml --flag True
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml --flag True
+python3 main.py --config /home/admin/configs/config_utr.yaml --flag True
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml -f True -p checkpoints/test_saving.pth
+python3 main.py --config /home/admin/configs/config_vtr.yaml -f True -p checkpoints/test_saving.pth
+python3 main.py --config /home/admin/configs/config_vtr.yaml -f True -p checkpoints/test_saving.pth
+python3 main.py --config /home/admin/configs/config_vtr.yaml -f True -p checkpoints/test_saving.pth
+python3 main.py --config /home/admin/configs/config_vtr.yaml -f True -p checkpoints/test_saving.pth
+python3 main.py --config /home/admin/configs/config_vtr.yaml -f True -p checkpoints/test_saving.pth
+python3 main.py --config /home/admin/configs/config_vtr.yaml -f True -p checkpoints/test_saving.pth
+python3 main.py --config /home/admin/configs/config_vtr.yaml -f True -p checkpoints/test_saving.pth
+python3 main.py --config /home/admin/configs/config_vtr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml 

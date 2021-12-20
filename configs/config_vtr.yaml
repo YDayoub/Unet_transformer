@@ -5,23 +5,26 @@ model_config:
   nlayers : 2
   nhead : 4 
   dropout : 0.4 
-  emb_dropout: 0.1
+  emb_dropout: 0.4 
+  out_dropout: 0.6 
   activation : 'relu'
+  tying: True
 dataset_config:
   tokenizer: 'spacy' # spacy, basic_english, char
   dataset: 'wiki2' # wiki2, wiki103
 training:
-  opt: 'Noam' # linear, Noam
+  opt: 'NoamOptimizer' # linear, NoamOptimizer, sgd_platue
   n_epochs : 100
   batch_size:  20
-  bptt: 128
+  bptt: 70
   clip_grad_norm: 0.5
   use_aux: False
   adaptive_dropout: False
   save_model: False
   logging: False
-  use_var_len: True
+  use_var_len: False
   weight_aux: 0.1
+  weight_decay: 1e-5
 eval:
   batch_size: 8 
 

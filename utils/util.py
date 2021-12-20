@@ -3,6 +3,8 @@ import yaml
 import os
 import numpy as np
 import random
+import matplotlib as mpl
+from matplotlib import pyplot as plt
 
 
 def generate_square_subsequent_mask(sz):
@@ -57,3 +59,46 @@ def set_seed(seed):
     np.random.seed(seed)
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
+
+
+def save_fig(fpath, tight_layout=True, fig_extension="png", resolution=300):
+
+    print("Saving figure", fpath)
+    if tight_layout:
+        plt.tight_layout()
+    plt.savefig(fpath, format=fig_extension, dpi=resolution)
+
+
+def save_model(checkpoint, path):
+    '''
+    function to save model
+    Args:
+        checkpoint: a dictionary which contians:
+        'configs': configs
+        'epoch': epoch,
+        'model': model,
+        'optimizer': optimizer,
+    
+    '''
+    torch.save(checkpoint, path)
+
+
+def load_model(fpath):
+    '''
+    path to the checkpoint file
+    the checkpoint file should contains the following:
+        'configs': configs
+        'epoch': epoch,
+        'model': model,
+        'optimizer': optimizer,
+
+    '''
+    checkpoint = torch.load(fpath)
+    epoch = checkpoint['epoch']
+    model = checkpoint['model']
+    optimizer = checkpoint['optimizer']
+    configs = checkpoint['configs']
+    return model, optimizer, epoch, configs 
+
+
+

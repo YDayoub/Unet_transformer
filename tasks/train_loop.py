@@ -8,32 +8,35 @@ import os
 from torch.utils.tensorboard import SummaryWriter
 
 
-def trainLoop(model, epochs, train_data, val_data, optimizer, criterion,\
+def trainLoop(model, start_epoch, epochs, train_data, val_data, optimizer, criterion,\
      device, bptt, clip_gradient, ntokens, save_model=True,\
-          adaptive_dropout=False, logging=False, log_dir=None,use_var_len=False):
+          adaptive_dropout=False, logging=False, log_dir=None,use_var_len=False, custom_loss=None):
     best_val_loss = float('inf')
     best_model = None
-    name = time.strftime('state_dict_%Y_%m_%d-%H_%M_%S.pt')
+    name = time.strftime('{}_state_dict_%Y_%m_%d-%H_%M_%S.pt'.format(model.model_type))
     writer = SummaryWriter(log_dir=log_dir) if logging else None
 
-    for epoch in range(1, epochs + 1):
-        p  = min(1.5*epoch/100.0,0.2)
+    for epoch in range(start_epoch, epochs + 1):
+        p  = min(1.5*epoch/100.0,0.4)
         if adaptive_dropout:
-            model.set_dropout(p)
+            with torch.no_grad():
+                model.set_dropout(p)
             print('dropout in epoch {:2d}: {:.4f}'.format(epoch, p))
         epoch_start_time = time.time()
-        model, train_loss, train_ppl = train(epoch, model, optimizer, criterion,
+        train_criterion =  custom_loss if custom_loss else criterion
+        model, train_loss, train_ppl = train(epoch, model, optimizer, train_criterion,
                       train_data, ntokens, bptt, clip_gradient, device, writer,\
                           use_var_len=use_var_len)
         val_loss = evaluate(model, criterion, val_data,
                             ntokens, bptt, device)
+        optimizer.schedule_step(val_loss)
         
         val_ppl = math.exp(val_loss)
         elapsed = time.time() - epoch_start_time
 
         print('-' * 89)
         print(f'| end of epoch {epoch:3d} | time: {elapsed:5.2f}s | '
-              f'valid loss {val_loss:5.5f} | valid ppl {val_ppl:8.2f}')
+              f'valid loss {val_loss:5.6f} | valid ppl {val_ppl:8.6f}')
         print('-' * 89)
         if writer:
             writer.add_scalar('val/loss', val_loss, epoch)
@@ -56,6 +59,7 @@ def trainLoop(model, epochs, train_data, val_data, optimizer, criterion,\
     val_loss = evaluate(model, criterion, val_data,
                             ntokens, bptt, device)
     val_ppl = math.exp(val_loss)
+
 
     return model, train_loss, train_ppl, val_loss, val_ppl
 

@@ -4,7 +4,7 @@ import time
 import torch
 import math
 import numpy as np
-
+import torch.nn as nn
 def get_sequence_length(bptt, use_var_length):
     if not use_var_length:
         return bptt
@@ -22,8 +22,10 @@ def train(epoch, model, optimizer, criterion, train_data,\
     start_time = time.time()
     num_batches = len(train_data) // bptt
 
-    hist_counter = 0
     i, batch =0, 0
+    alpha = 0
+    beta = 0
+    #mse = nn.MSELoss()
     
     #for batch, i in enumerate(range(0, train_data.size(0) - 1, bptt)):
     while i < train_data.size(0) - 1 - 1:
@@ -35,20 +37,32 @@ def train(epoch, model, optimizer, criterion, train_data,\
         # if batch_size != bptt:  # only on last batch
         #     src_mask = src_mask[:batch_size, :batch_size]
         if model.use_aux:
-            output, aux_output = model(data, src_mask)
+            output, aux_output, hidden_states = model(data, src_mask)
             main_loss = criterion(output.view(-1, ntokens), targets)
             aux_loss = criterion(aux_output.view(-1, ntokens), targets)        
-            loss = main_loss*(1-model.aux_weight) + model.aux_weight * aux_loss                
+            loss = main_loss*(1-model.aux_weight) + model.aux_weight * aux_loss 
+        
         else:
-            output = model(data, src_mask)
+            output, hidden_states = model(data, src_mask)
             loss = criterion(output.view(-1, ntokens), targets)
+        if alpha:
+            ar_loss = sum(alpha * h.pow(2).mean() for h in hidden_states)
+            loss +=  ar_loss
+        if beta:
+            tar_loss = sum(beta*(h[1:]-h[:-1]).pow(2).mean() for h in hidden_states)
+            loss +=   tar_loss  
+ 
+            
+        if use_var_len:
+            scale_lr = batch_size/bptt
+            optimizer.scalar = scale_lr
 
         optimizer.zero_grad()
         loss.backward()
-        if (batch % log_interval)== 0 and batch > 0:
-            if writer:
-                step = (num_batches//log_interval)*epoch+hist_counter
-                hist_counter += 1
+        # if (batch % log_interval)== 0 and batch > 0:
+        #     if writer:
+        #         step = (num_batches//log_interval)*epoch+hist_counter
+        #         hist_counter += 1
                 #writer.add_histogram('decoder/weights.grad', model.decoder.weight.grad, step)
                 #writer.add_histogram('decoder/bias.grad', model.decoder.bias.grad, step)
         
@@ -77,8 +91,8 @@ def train(epoch, model, optimizer, criterion, train_data,\
             cur_loss = total_loss / log_interval
             ppl = math.exp(cur_loss)
             print(f'| epoch {epoch:3d} | {batch:5d}/{num_batches:5d} batches | '
-                  f'lr {lr:02.5f} | ms/batch {ms_per_batch:5.2f} | '
-                  f'loss {cur_loss:5.2f} | ppl {ppl:8.2f}| seq_len {batch_size:5d}')
+                  f'lr {lr:02.8f} | ms/batch {ms_per_batch:5.2f} | '
+                  f'loss {cur_loss:5.6f} | ppl {ppl:8.6f}| seq_len {batch_size:5d}')
             total_loss = 0
             start_time = time.time()
         batch +=1

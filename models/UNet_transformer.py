@@ -12,13 +12,15 @@ def get_activation_fn(activation):
         return F.relu
     elif activation == "gelu":
         return F.gelu
+
 class UTransformer(nn.Module):
 
     def __init__(self, ntokens: int,  d_model: int, nhead: int, dim_feedforward: int,
-                 nlayers: int, drop_rate: float = 0.5, emb_dropout: float=0.5, activation: str = 'relu', use_aux = False, weight=None, *args, **kwargs):
+                 nlayers: int, drop_rate: float = 0.4,in_dropout: float=0.65, emb_dropout: float=0.1, out_dropout: float=0.4, activation: str = 'relu',\
+                      use_aux = False, weight=None, tying=False, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self.model_type = 'U-transformer'
-        self.pos_encoder = PositionalEncoding(d_model, drop_rate)
+        self.pos_encoder = PositionalEncoding(d_model, in_dropout)
         self.transformer_encoder = nn.ModuleList([TransformerEncoderLayer(d_model=d_model, nhead=nhead, \
                                                                           dim_feedforward=dim_feedforward,\
                                                                           dropout=drop_rate, activation=activation, norm_first=True)\
@@ -28,12 +30,16 @@ class UTransformer(nn.Module):
                                                                           dim_feedforward=dim_feedforward,\
                                                                           dropout=drop_rate, activation=activation, norm_first=True)\
                                                    for _ in range(nlayers)])
-        self.embedding = nn.Embedding(ntokens, d_model)
-        self.dropout = nn.Dropout(drop_rate)
+        self.embedding = nn.Embedding(ntokens, d_model, scale_grad_by_freq=False)
+        self.dropout = nn.Dropout(out_dropout)
         self.emb_dropout = emb_dropout
 
         self.d_model = d_model
+        self.tying = tying
         self.decoder = nn.Linear(d_model, ntokens)
+        self.drop_out = nn.Dropout(0)
+        if self.tying:
+            self.decoder.weight = self.embedding.weight
         self.use_aux = use_aux
         self.dropout_val = drop_rate
         if self.use_aux:
@@ -55,11 +61,11 @@ class UTransformer(nn.Module):
                 torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
                 m.bias.data.fill_(0.01)
         self.apply(initialization)
-        # torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
         # initrange = 0.1
         # self.embedding.weight.data.uniform_(-initrange, initrange)
-        #self.decoder.bias.data.zero_()
-        #self.decoder.weight.data.uniform_(-initrange, initrange)
+        # if not self.tying:
+        #     self.decoder.bias.data.zero_()
+        #     self.decoder.weight.data.uniform_(-initrange, initrange)
 
     def set_dropout(self, drop_rate=0.1)-> None:
         def set_dropout_rec(model, p):
@@ -80,19 +86,30 @@ class UTransformer(nn.Module):
         """
         #src = self.embedding(src) * math.sqrt(self.d_model)
         #src = self.embedding(src) 
-        src = embedded_dropout(self.embedding,src, \
+        src = embedded_dropout(self.embedding, src,\
             dropout=self.emb_dropout)
         memory = self.pos_encoder(src)
         encoder_outputs = []
+        hidden_states = []
         for layer in self.transformer_encoder:
             memory = layer(memory, src_mask=src_mask)
+            hidden_states.append(memory)
             encoder_outputs.append(memory)
         output = memory
         if self.use_aux:
             aux_output = self.decoder_aux(output)
         for layer in self.transformer_decoder:
-          output = layer(output, encoder_outputs.pop(),\
-                                                 memory_mask=src_mask, tgt_mask=src_mask)              
-        output = self.decoder(output)
-        #output = torch.matmul(output, self.embedding.weight.t())
-        return (output, aux_output) if self.use_aux else output
+            output = layer(output, encoder_outputs.pop(),\
+                        memory_mask=src_mask, tgt_mask=src_mask)  
+                                                 
+            hidden_states.append(output)
+        
+        ####### outputs ######
+        
+        output = self.drop_out(output)
+  
+        if self.tying:
+            output = F.linear(output, self.decoder.weight, self.decoder.bias)
+        else:      
+            output = self.decoder(output)
+        return (output, aux_output, hidden_states) if self.use_aux else (output, hidden_states)
