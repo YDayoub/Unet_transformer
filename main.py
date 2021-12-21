@@ -22,7 +22,20 @@ from datasets.Data import Corpus
 from tasks.pointer import evaluate_pointer
 
 
+def get_activation(act_func:str='relu'):
+    if act_func=='relu':
+        return nn.functional.relu_
+    elif act_func == 'gelu':
+        return nn.functional.gelu
+    elif act_func == 'elu':
+        return nn.functional.elu
+    elif act_func == 'leaky_relu':
+        return nn.functional.leaky_relu
+    else:
+        raise Exception('Please specify valid activaiton function')
+
 def main():
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '-c', '--config', help='path to the config file', required=True)
@@ -54,7 +67,9 @@ def main():
 
 
     #--------------- Reproducibility -------------#
-    set_seed(1111)
+    #set_seed(1111)
+    config = {**config, 'seed': 1111}
+    print(config)
     #---------------                  -------------#
     model_config = config['model_config']
     training_config = config['training']
@@ -79,25 +94,28 @@ def main():
     emb_dropout = model_config['emb_dropout']
     out_dropout = model_config['out_dropout']
     in_dropout = model_config['in_dropout']
-    activation = model_config['activation']  # activation function
+    activation = get_activation(model_config['activation'])  # activation function
+    
     tying = model_config['tying']
-    # if dataset_config['tokenizer'] == 'char':
-    #     if dataset_config['dataset'] == 'wiki2':
-    #         ds = wiki2(char=True)
-    #     else:
-    #         ds = wiki103(char=True)
-    # else:
-    #     tokenizer = get_tokenizer(dataset_config['tokenizer'])
-    #     if dataset_config['dataset'] == 'wiki2':
-    #         ds = wiki2(tokenizer)
-    #     elif dataset_config['dataset'] == 'wiki103':
-    #         ds = wiki103(tokenizer)
+    alpha = float(training_config['alpha'])
+    beta = float(training_config['beta'])
+    if dataset_config['tokenizer'] == 'char':
+        if dataset_config['dataset'] == 'wiki2':
+            ds = wiki2(char=True)
+        else:
+            ds = wiki103(char=True)
+    else:
+        tokenizer = get_tokenizer(dataset_config['tokenizer'])
+        if dataset_config['dataset'] == 'wiki2':
+            ds = wiki2(tokenizer)
+        elif dataset_config['dataset'] == 'wiki103':
+            ds = wiki103(tokenizer)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Training On Device: {}'.format(device))
     #------------------loading_dataset-----------------#
-    #(train_data, val_data, test_data) = ds.get_all_data()
-    ds = Corpus('/home/admin/datasets/wikitext-2')
-    (train_data, val_data, test_data) = ds.train, ds.valid, ds.test
+    (train_data, val_data, test_data) = ds.get_all_data()
+    # ds = Corpus('/home/admin/datasets/wikitext-2')
+    # (train_data, val_data, test_data) = ds.train, ds.valid, ds.test
     train_data = batchify(train_data, train_batch_size,
                           device)  # shape [seq_len, batch_size]
     val_data = batchify(val_data, eval_batch_size, device)
@@ -121,7 +139,7 @@ def main():
                                for p in model.parameters() if p.requires_grad)
     print('-' * 89)
     print(
-        f"## Training model with {pytorch_total_params/1000000:0.2F}M trainable parameters for {epochs:3d} epochs ##")
+        '#'*12+f" Training model with {pytorch_total_params/1000000:0.2F}M trainable parameters for {epochs:3d} epochs "+'#'*12)
     print('-' * 89)
 
     criterion = nn.CrossEntropyLoss()
@@ -149,6 +167,7 @@ def main():
 
 
 
+
     opt = torch.optim.RAdam(model.parameters(),\
          **opt_args)
     
@@ -165,6 +184,10 @@ def main():
         schedular = ReduceLROnPlateau(optimizer=opt, **Reduce_on_Plateua_args)
         args = {'optimizer':opt, 'schedular': schedular} 
         opt.param_groups[0]['lr'] = 5
+    elif training_config['opt'] == 'sgd_lr':
+        opt = torch.optim.SGD(model.parameters(), lr = 5)
+        scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=1, gamma=0.95)
+        args = {'optimizer':opt, 'schedular': scheduler} 
     optimizer = create_optimizer(training_config['opt'],**args) if not 'optimizer' in vars() else optimizer
 
     log_dir = time.strftime('logging/{}_%Y_%m_%d-%H_%M_%S'.format(config['model']))
@@ -177,17 +200,12 @@ def main():
 
     
 
-    model, train_loss, train_ppl, val_loss, val_ppl = trainLoop(model, start_epoch, epochs, train_data, val_data, optimizer,
-              criterion, device, bptt, clip_grad_norm, ntokens,  save_model=training_config['save_model']\
+    
+    model, train_loss, train_ppl, val_loss, val_ppl = trainLoop(model, config, start_epoch, epochs, train_data, val_data, optimizer,
+              criterion, device, bptt, clip_grad_norm, ntokens,alpha=alpha, beta=beta,  save_model_flag=training_config['save_model']\
                   ,adaptive_dropout = training_config['adaptive_dropout'], logging=logging, log_dir=log_dir,\
                       use_var_len=use_var_len, custom_loss = None)
-    checkpoint = {
-        'model': model,
-        'optimizer': optimizer,
-        'epoch': epochs,
-        'configs': config
-    }
-    save_model(checkpoint, '/home/admin/checkpoints/last_model.pth')
+
 
     test_loss, test_ppl = test(model, criterion, test_data, ntokens, bptt, device)
 
@@ -216,4 +234,13 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        import sys
+        print('keyboard itnerrupt has been called')
+        
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)

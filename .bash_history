@@ -1,110 +1,3 @@
-ls
-python --config configs/config_utr.yaml
-python main.py --config configs/config_utr.yaml
-clear
-python main.py --config configs/config_utr.yaml
-python main.py --config configs/config_utr.yaml
-python main.py --config configs/config_utr.yaml
-ls
-/usr/bin/python3 /home/admin/main.py
-python main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-clear
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-/usr/bin/python3 /home/admin/main.py
-clear
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-import torch
-import yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-git init
-rm train.py
-rm utils.py
-rm Noam.py
-echo "# Unet_transformer" >> README.md
-git add .
-git commit -m 'first_commit'
-git config --global user.email 'yazandayoubsyria@gmail.com'
-git config --global user.name 'YDayoub'
-git commit -m 'first_commit'
-git remote add origin https://github.com/YDayoub/Unet_transformer.git
-git push -u origin
- git push --set-upstream origin master
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-unzip help
-help unzip
-unzip
-sudo apt install unizp
-sudo apt install unzip
-sudo apt install unizp
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr_chr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-git add .
-git commit -m 'create_different_config'
-git push -u origin
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
-python3 main.py --config configs/config_utr.yaml
 python3 main.py --config configs/config_utr.yaml
 python3 main.py --config configs/config_utr.yaml
 python3 main.py --config configs/config_utr.yaml
@@ -472,3 +365,136 @@ python3 main.py --config /home/admin/configs/config_utr.yaml
 python3 main.py --config /home/admin/configs/config_utr.yaml 
 python3 main.py --config /home/admin/configs/config_utr.yaml 
 python3 main.py --config /home/admin/configs/config_utr.yaml 
+datasets/get_data.sh
+datasets/get_data.sh
+chmod u+r+x filename.sh
+chmod u+r+x datasets/get_data.sh
+datasets/get_data.sh
+rm -r wikitext-2
+rm wikitext-2-v1.zip
+datasets/get_data.sh
+datasets/get_data.sh
+datasets/get_data.sh
+datasets/get_data.sh
+datasets/get_data.sh
+rm -r /home/admin/datasets/wikitext-2/wikitext-2
+rm -r /home/admin/datasets/wikitext-2
+rm -r /home/admin/wikitext-2
+rm -r /home/admin/datasets/wikitext-2
+datasets/get_data.sh
+python3 main.py --config /home/admin/configs/config_utr.yaml 
+python3 main.py --config /home/admin/configs/config_utr.yaml \
+python3 main.py --config /home/admin/configs/config_utr.yaml \
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+            print('next_word_history.shape {}'.format(next_word_history.shape()))
+            print('next_word_history.shape {}'.format(next_word_history.shape()))
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+git ad  .
+git add .
+git commit -m 'added_dropout_all'
+git push -u origin
+rm -r checkpoints
+mk checkpoints
+mkdir checkpoints
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear 
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+ls
+ls
+ls

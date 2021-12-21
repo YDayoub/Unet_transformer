@@ -16,28 +16,26 @@ def get_activation_fn(activation):
 class UTransformer(nn.Module):
 
     def __init__(self, ntokens: int,  d_model: int, nhead: int, dim_feedforward: int,
-                 nlayers: int, drop_rate: float = 0.4,in_dropout: float=0.65, emb_dropout: float=0.1, out_dropout: float=0.4, activation: str = 'relu',\
+                 nlayers: int, drop_rate: float = 0.4,in_dropout: float=0.65, emb_dropout: float=0.1, out_dropout: float=0.4, activation: callable = torch.nn.functional.relu,\
                       use_aux = False, weight=None, tying=False, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self.model_type = 'U-transformer'
         self.pos_encoder = PositionalEncoding(d_model, in_dropout)
         self.transformer_encoder = nn.ModuleList([TransformerEncoderLayer(d_model=d_model, nhead=nhead, \
                                                                           dim_feedforward=dim_feedforward,\
-                                                                          dropout=drop_rate, activation=activation, norm_first=True)\
+                                                                          dropout=drop_rate, activation=activation)\
                                                    for _ in range(nlayers)])
 
         self.transformer_decoder = nn.ModuleList([TransformerDecoderLayer(d_model=d_model, nhead=nhead,\
                                                                           dim_feedforward=dim_feedforward,\
-                                                                          dropout=drop_rate, activation=activation, norm_first=True)\
+                                                                          dropout=drop_rate, activation=activation)\
                                                    for _ in range(nlayers)])
-        self.embedding = nn.Embedding(ntokens, d_model, scale_grad_by_freq=False)
+        self.embedding = nn.Embedding(ntokens, d_model)
         self.dropout = nn.Dropout(out_dropout)
         self.emb_dropout = emb_dropout
-
         self.d_model = d_model
         self.tying = tying
         self.decoder = nn.Linear(d_model, ntokens)
-        self.drop_out = nn.Dropout(0)
         if self.tying:
             self.decoder.weight = self.embedding.weight
         self.use_aux = use_aux
@@ -85,9 +83,9 @@ class UTransformer(nn.Module):
             output Tensor of shape [seq_len, batch_size, ntoken]
         """
         #src = self.embedding(src) * math.sqrt(self.d_model)
-        #src = self.embedding(src) 
-        src = embedded_dropout(self.embedding, src,\
-            dropout=self.emb_dropout)
+        src = self.embedding(src) 
+        # src = embedded_dropout(self.embedding, src,\
+        #    dropout=self.emb_dropout)
         memory = self.pos_encoder(src)
         encoder_outputs = []
         hidden_states = []
@@ -106,7 +104,7 @@ class UTransformer(nn.Module):
         
         ####### outputs ######
         
-        output = self.drop_out(output)
+        #output = self.dropout(output)
   
         if self.tying:
             output = F.linear(output, self.decoder.weight, self.decoder.bias)

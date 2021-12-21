@@ -1,33 +1,35 @@
 model: 'U-transformer' # vanilla-transformer, U-transformer
 model_config:
-  d_model : 400  
-  dim_feedforward : 400 
+  d_model : 768  
+  dim_feedforward : 1024 
   nlayers : 2
   nhead : 4 
   dropout : 0.2
-  emb_dropout: 0.0
-  out_dropout: 0.0 
-  in_dropout: 0.0
+  emb_dropout: 0.2
+  out_dropout: 0.2 
+  in_dropout: 0.2
   activation : 'relu'
-  tying: True
+  tying: False
 dataset_config:
-  tokenizer: 'basic_english' # spacy, basic_english, char
+  tokenizer: 'spacy' # spacy, basic_english, char
   dataset: 'wiki2' # wiki2, wiki103
 training:
   opt: 'linear' # linear, NoamOptimizer, sgd_platue
-  n_epochs : 100
+  n_epochs : 150
   batch_size:  20
   bptt: 128
   clip_grad_norm: 0.5
   use_aux: False
   adaptive_dropout: False
   save_model: True
-  logging: True
+  logging: False
   use_var_len: False
   weight_aux: 0.1
   weight_decay: 1e-5
+  alpha: 0
+  beta: 0
 eval:
-  batch_size: 1 
+  batch_size: 8 
 test:
   batch_size: 1
 

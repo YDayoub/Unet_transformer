@@ -6,16 +6,15 @@ import math
 import copy
 import os
 from torch.utils.tensorboard import SummaryWriter
+from utils.util import save_model
 
-
-def trainLoop(model, start_epoch, epochs, train_data, val_data, optimizer, criterion,\
-     device, bptt, clip_gradient, ntokens, save_model=True,\
+def trainLoop(model, config, start_epoch, epochs, train_data, val_data, optimizer, criterion,\
+     device, bptt, clip_gradient, ntokens, alpha, beta, save_model_flag=True,\
           adaptive_dropout=False, logging=False, log_dir=None,use_var_len=False, custom_loss=None):
     best_val_loss = float('inf')
     best_model = None
     name = time.strftime('{}_state_dict_%Y_%m_%d-%H_%M_%S.pt'.format(model.model_type))
     writer = SummaryWriter(log_dir=log_dir) if logging else None
-
     for epoch in range(start_epoch, epochs + 1):
         p  = min(1.5*epoch/100.0,0.4)
         if adaptive_dropout:
@@ -25,8 +24,8 @@ def trainLoop(model, start_epoch, epochs, train_data, val_data, optimizer, crite
         epoch_start_time = time.time()
         train_criterion =  custom_loss if custom_loss else criterion
         model, train_loss, train_ppl = train(epoch, model, optimizer, train_criterion,
-                      train_data, ntokens, bptt, clip_gradient, device, writer,\
-                          use_var_len=use_var_len)
+                      train_data, ntokens, bptt, clip_gradient, device, writer=writer,\
+                          use_var_len=use_var_len,alpha = alpha, beta=beta)
         val_loss = evaluate(model, criterion, val_data,
                             ntokens, bptt, device)
         optimizer.schedule_step(val_loss)
@@ -52,9 +51,15 @@ def trainLoop(model, start_epoch, epochs, train_data, val_data, optimizer, crite
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             best_model = copy.deepcopy(model)
-        if save_model:
+        if save_model_flag:
             fpath = os.path.join('checkpoints', name)
-            torch.save(best_model.state_dict(), fpath)
+            checkpoints = {
+                'model': best_model,
+                'configs': config,
+                'epoch': epoch,
+                'optimizer': optimizer,
+            }
+            save_model(checkpoints, fpath)
     model = best_model
     val_loss = evaluate(model, criterion, val_data,
                             ntokens, bptt, device)

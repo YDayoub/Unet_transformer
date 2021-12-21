@@ -15,16 +15,16 @@ def get_sequence_length(bptt, use_var_length):
     
 
 def train(epoch, model, optimizer, criterion, train_data,\
-     ntokens, bptt, clip_gradient, device, writer=None, use_var_len=False):
+     ntokens, bptt, clip_gradient, device, alpha, beta, writer=None, use_var_len=False):
     model.train()  # turn on train mode
     total_loss = 0.
+    total_loss_main = 0.
     log_interval = 200
     start_time = time.time()
     num_batches = len(train_data) // bptt
 
     i, batch =0, 0
-    alpha = 0
-    beta = 0
+
     #mse = nn.MSELoss()
     
     #for batch, i in enumerate(range(0, train_data.size(0) - 1, bptt)):
@@ -39,18 +39,19 @@ def train(epoch, model, optimizer, criterion, train_data,\
         if model.use_aux:
             output, aux_output, hidden_states = model(data, src_mask)
             main_loss = criterion(output.view(-1, ntokens), targets)
-            aux_loss = criterion(aux_output.view(-1, ntokens), targets)        
+            aux_loss = criterion(aux_output.view(-1, ntokens), data)        
             loss = main_loss*(1-model.aux_weight) + model.aux_weight * aux_loss 
         
         else:
             output, hidden_states = model(data, src_mask)
-            loss = criterion(output.view(-1, ntokens), targets)
+            main_loss = criterion(output.view(-1, ntokens), targets)
+            loss = 1.0*main_loss
         if alpha:
             ar_loss = sum(alpha * h.pow(2).mean() for h in hidden_states)
-            loss +=  ar_loss
+            loss += ar_loss
         if beta:
             tar_loss = sum(beta*(h[1:]-h[:-1]).pow(2).mean() for h in hidden_states)
-            loss +=   tar_loss  
+            loss += tar_loss  
  
             
         if use_var_len:
@@ -70,6 +71,7 @@ def train(epoch, model, optimizer, criterion, train_data,\
             torch.nn.utils.clip_grad_norm_(model.parameters(), clip_gradient)
         optimizer.step()
 
+        total_loss_main += main_loss.item()
         total_loss += loss.item()
         if model.use_aux and writer:
             writer.add_scalars('train/loss', {'main_loss': main_loss.item(),\
@@ -89,11 +91,13 @@ def train(epoch, model, optimizer, criterion, train_data,\
             lr = optimizer.lr
             ms_per_batch = (time.time() - start_time) * 1000 / log_interval
             cur_loss = total_loss / log_interval
-            ppl = math.exp(cur_loss)
+            cur_loss_main = total_loss_main/ log_interval
+            ppl = math.exp(cur_loss_main)
             print(f'| epoch {epoch:3d} | {batch:5d}/{num_batches:5d} batches | '
                   f'lr {lr:02.8f} | ms/batch {ms_per_batch:5.2f} | '
-                  f'loss {cur_loss:5.6f} | ppl {ppl:8.6f}| seq_len {batch_size:5d}')
-            total_loss = 0
+                  f'loss {cur_loss:5.6f} |loss_main {cur_loss_main:5.6f} | ppl {ppl:8.6f}| seq_len {batch_size:5d}')
+            total_loss = 0.0
+            total_loss_main = 0.0
             start_time = time.time()
         batch +=1
         i += seq_len
