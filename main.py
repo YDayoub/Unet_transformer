@@ -67,7 +67,7 @@ def main():
 
 
     #--------------- Reproducibility -------------#
-    #set_seed(1111)
+    set_seed(1111)
     config = {**config, 'seed': 1111}
     print(config)
     #---------------                  -------------#
@@ -94,6 +94,7 @@ def main():
     emb_dropout = model_config['emb_dropout']
     out_dropout = model_config['out_dropout']
     in_dropout = model_config['in_dropout']
+    mos = model_config['mos']
     activation = get_activation(model_config['activation'])  # activation function
     
     tying = model_config['tying']
@@ -127,7 +128,7 @@ def main():
                  'drop_rate': dropout, 'activation': activation, 'use_aux':use_aux\
                 , 'weight': weight_aux, 'tying': tying, 'emb_dropout':emb_dropout,
                 
-                'in_dropout': in_dropout,  'out_dropout': out_dropout,
+                'in_dropout': in_dropout,  'out_dropout': out_dropout, 'mos': mos
                 
                 }
     model = create_model(config['model'],**model_args).to(device) if not 'model' in vars() else model
@@ -142,7 +143,11 @@ def main():
         '#'*12+f" Training model with {pytorch_total_params/1000000:0.2F}M trainable parameters for {epochs:3d} epochs "+'#'*12)
     print('-' * 89)
 
-    criterion = nn.CrossEntropyLoss()
+    if model.mos:
+        criterion = nn.functional.nll_loss
+        print('I am here -^_^-')
+    else:
+        criterion = nn.CrossEntropyLoss()
     custom_loss = custom_ce_loss(num_classes=ntokens, power=2)
     steps_per_epoch = len(train_data)//bptt+1
     total_steps = epochs*(steps_per_epoch)
@@ -165,29 +170,49 @@ def main():
          'factor':0.1, 'patience': 3
     }
 
+    CyclicLR_args = {
+
+         'base_lr': 0, 'max_lr': 1e-3, 'step_size_up': steps_per_epoch*30,
+          'step_size_down': steps_per_epoch*45, 
+          'mode': 'triangular2', 'cycle_momentum': False
+     }
 
 
 
-    opt = torch.optim.RAdam(model.parameters(),\
-         **opt_args)
+
+
     
 
     if training_config['opt'] == 'NoamOptimizer':
+        opt = torch.optim.RAdam(model.parameters(),\
+         **opt_args)
         schedular_args = Noam_args
         args = {**schedular_args, 'optimizer':opt}
     elif training_config['opt'] == 'linear':
+        opt = torch.optim.RAdam(model.parameters(),\
+         **opt_args)
         schedular_args = linear_args
         schedular = OneCycleLR(optimizer=opt, **schedular_args)
         args = {'schedular': schedular, 'optimizer':opt}
     elif training_config['opt'] == 'sgd_platue':
         opt = torch.optim.SGD(model.parameters(), lr=5, weight_decay = weight_decay)
         schedular = ReduceLROnPlateau(optimizer=opt, **Reduce_on_Plateua_args)
+        schedular_args = Reduce_on_Plateua_args
         args = {'optimizer':opt, 'schedular': schedular} 
         opt.param_groups[0]['lr'] = 5
     elif training_config['opt'] == 'sgd_lr':
         opt = torch.optim.SGD(model.parameters(), lr = 5)
         scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=1, gamma=0.95)
+        schedular_args = {'step_size':1, 'gamma':0.95}
         args = {'optimizer':opt, 'schedular': scheduler} 
+    elif training_config['opt'] == 'cyclic_linear':
+        opt = torch.optim.RAdam(model.parameters(),\
+         **opt_args)
+        schedular_args = CyclicLR_args
+        scheduler = torch.optim.lr_scheduler.CyclicLR(opt, **CyclicLR_args) 
+        args = {'optimizer':opt, 'schedular': scheduler}
+
+
     optimizer = create_optimizer(training_config['opt'],**args) if not 'optimizer' in vars() else optimizer
 
     log_dir = time.strftime('logging/{}_%Y_%m_%d-%H_%M_%S'.format(config['model']))

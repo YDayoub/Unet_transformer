@@ -13,7 +13,7 @@ def trainLoop(model, config, start_epoch, epochs, train_data, val_data, optimize
           adaptive_dropout=False, logging=False, log_dir=None,use_var_len=False, custom_loss=None):
     best_val_loss = float('inf')
     best_model = None
-    name = time.strftime('{}_state_dict_%Y_%m_%d-%H_%M_%S.pt'.format(model.model_type))
+    name = time.strftime('{}_state_dict_%Y_%m_%d-%H_%M_%S.pth'.format(model.model_type))
     writer = SummaryWriter(log_dir=log_dir) if logging else None
     for epoch in range(start_epoch, epochs + 1):
         p  = min(1.5*epoch/100.0,0.4)

@@ -17,7 +17,7 @@ class UTransformer(nn.Module):
 
     def __init__(self, ntokens: int,  d_model: int, nhead: int, dim_feedforward: int,
                  nlayers: int, drop_rate: float = 0.4,in_dropout: float=0.65, emb_dropout: float=0.1, out_dropout: float=0.4, activation: callable = torch.nn.functional.relu,\
-                      use_aux = False, weight=None, tying=False, *args, **kwargs):
+                      use_aux = False, weight=None, tying=False, mos:bool=True, n_experts:int=3, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self.model_type = 'U-transformer'
         self.pos_encoder = PositionalEncoding(d_model, in_dropout)
@@ -35,9 +35,18 @@ class UTransformer(nn.Module):
         self.emb_dropout = emb_dropout
         self.d_model = d_model
         self.tying = tying
+        self.ntokens = ntokens
+        self.mos = mos
+        self.n_experts = n_experts
         self.decoder = nn.Linear(d_model, ntokens)
         if self.tying:
             self.decoder.weight = self.embedding.weight
+        if self.mos:
+            self.prior = nn.Linear(d_model, n_experts, bias = False)
+            self.latent = nn.Sequential(nn.Linear(d_model, n_experts*d_model),\
+                                            nn.Tanh())
+        
+
         self.use_aux = use_aux
         self.dropout_val = drop_rate
         if self.use_aux:
@@ -57,7 +66,10 @@ class UTransformer(nn.Module):
         def initialization(m):
             if isinstance(m, nn.Linear):
                 torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
-                m.bias.data.fill_(0.01)
+                try:
+                    m.bias.data.fill_(0.01)
+                except Exception as e:
+                    pass
         self.apply(initialization)
         # initrange = 0.1
         # self.embedding.weight.data.uniform_(-initrange, initrange)
@@ -105,9 +117,27 @@ class UTransformer(nn.Module):
         ####### outputs ######
         
         #output = self.dropout(output)
+        if self.mos:
+            shape = output.shape
+            prior = self.prior(output).contiguous()
+            prior = nn.functional.softmax(prior, -1)
+            latent = self.latent(output).view(shape[0], shape[1],self.n_experts,-1).contiguous()
+
   
         if self.tying:
-            output = F.linear(output, self.decoder.weight, self.decoder.bias)
-        else:      
-            output = self.decoder(output)
+            if self.mos:
+                logits = F.linear(latent, self.decoder.weight, self.decoder.bias)
+                prob = nn.functional.softmax(logits, -1)
+                output = torch.einsum('ijk,ijkl->ijl',prior,prob)
+            else:
+                output = F.linear(output, self.decoder.weight, self.decoder.bias)
+        else:  
+            if self.mos:
+                logits = self.decoder(latent)
+                prob = nn.functional.softmax(logits, -1)
+                output = torch.einsum('ijk,ijkl->ijl',prior,prob)
+                output = torch.log(output.add_(1e-8))
+
+            else:
+                output = self.decoder(output)
         return (output, aux_output, hidden_states) if self.use_aux else (output, hidden_states)

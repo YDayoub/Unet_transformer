@@ -4,13 +4,15 @@ from .linear_warmup import linearcycleWarmup
 from .NoamOptimizer import NoamOpt
 from .sgd_platue import SGDRPLateu
 from .Sgd_lr import SGDLR
+from .cyclic_linear import CyclicLR
 
 
 __factory = {
     'linear': linearcycleWarmup,
     'NoamOptimizer': NoamOpt,
     'sgd_platue': SGDRPLateu,
-    'sgd_lr': SGDLR
+    'sgd_lr': SGDLR,
+    'cyclic_linear': CyclicLR
 }
 
 

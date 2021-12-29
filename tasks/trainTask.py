@@ -5,11 +5,12 @@ import torch
 import math
 import numpy as np
 import torch.nn as nn
+import gc
 def get_sequence_length(bptt, use_var_length):
     if not use_var_length:
         return bptt
     seq_len = bptt if np.random.random() < 0.95 else bptt // 2
-    seq_len = max(5, int(np.random.normal(seq_len, 10))) 
+    seq_len = max(5, int(np.random.normal(seq_len, 5))) 
     seq_len = min(seq_len, bptt + 30)
     return seq_len
     
@@ -24,23 +25,17 @@ def train(epoch, model, optimizer, criterion, train_data,\
     num_batches = len(train_data) // bptt
 
     i, batch =0, 0
-
-    #mse = nn.MSELoss()
-    
-    #for batch, i in enumerate(range(0, train_data.size(0) - 1, bptt)):
     while i < train_data.size(0) - 1 - 1:
         seq_len = get_sequence_length(bptt, use_var_len)
         data, targets = get_batch(train_data, i, seq_len)
         curent_index = num_batches*epoch+batch
         batch_size = data.size(0)
         src_mask = generate_square_subsequent_mask(batch_size).to(device)
-        # if batch_size != bptt:  # only on last batch
-        #     src_mask = src_mask[:batch_size, :batch_size]
         if model.use_aux:
             output, aux_output, hidden_states = model(data, src_mask)
             main_loss = criterion(output.view(-1, ntokens), targets)
-            aux_loss = criterion(aux_output.view(-1, ntokens), data)        
-            loss = main_loss*(1-model.aux_weight) + model.aux_weight * aux_loss 
+            aux_loss = criterion(aux_output.view(-1, ntokens), data.view(-1))        
+            loss = main_loss + model.aux_weight * aux_loss 
         
         else:
             output, hidden_states = model(data, src_mask)
@@ -60,13 +55,6 @@ def train(epoch, model, optimizer, criterion, train_data,\
 
         optimizer.zero_grad()
         loss.backward()
-        # if (batch % log_interval)== 0 and batch > 0:
-        #     if writer:
-        #         step = (num_batches//log_interval)*epoch+hist_counter
-        #         hist_counter += 1
-                #writer.add_histogram('decoder/weights.grad', model.decoder.weight.grad, step)
-                #writer.add_histogram('decoder/bias.grad', model.decoder.bias.grad, step)
-        
         if clip_gradient>0:
             torch.nn.utils.clip_grad_norm_(model.parameters(), clip_gradient)
         optimizer.step()
@@ -101,4 +89,5 @@ def train(epoch, model, optimizer, criterion, train_data,\
             start_time = time.time()
         batch +=1
         i += seq_len
+        gc.collect()
     return model, cur_loss, math.exp(cur_loss)

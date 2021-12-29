@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from .UNet_transformer import UTransformer
 from .vanilla_transformer import VanillaTransformer
-
+from .EMA import ema
 
 __factory = {
     'vanilla-transformer': VanillaTransformer,
