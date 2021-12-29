@@ -10,7 +10,7 @@ model_config:
   in_dropout: 0.2
   activation : 'relu'
   tying: False
-  mos: False
+  mos: True
 dataset_config:
   tokenizer: 'spacy' # spacy, basic_english, char
   dataset: 'wiki2' # wiki2, wiki103

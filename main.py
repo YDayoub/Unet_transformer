@@ -145,7 +145,6 @@ def main():
 
     if model.mos:
         criterion = nn.functional.nll_loss
-        print('I am here -^_^-')
     else:
         criterion = nn.CrossEntropyLoss()
     custom_loss = custom_ce_loss(num_classes=ntokens, power=2)
