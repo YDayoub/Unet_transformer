@@ -10,7 +10,10 @@ model_config:
   in_dropout: 0.2
   activation : 'relu'
   tying: False
-  mos: True
+  mos: False
+  save_state: True
+  n_experts: 10
+  adv_tr: False
 dataset_config:
   tokenizer: 'spacy' # spacy, basic_english, char
   dataset: 'wiki2' # wiki2, wiki103
@@ -24,11 +27,14 @@ training:
   adaptive_dropout: False
   save_model: True
   logging: False
-  use_var_len: True
+  use_var_len: False
   weight_aux: 0.01
   weight_decay: 1e-5
   alpha: 0
   beta: 0
+  use_average: True
+  partial_shuffling: True
+  use_average: True
 eval:
   batch_size: 8 
 test:

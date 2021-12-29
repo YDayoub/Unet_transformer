@@ -10,7 +10,8 @@ from utils.util import save_model
 
 def trainLoop(model, config, start_epoch, epochs, train_data, val_data, optimizer, criterion,\
      device, bptt, clip_gradient, ntokens, alpha, beta, save_model_flag=True,\
-          adaptive_dropout=False, logging=False, log_dir=None,use_var_len=False, custom_loss=None):
+          adaptive_dropout=False, logging=False, log_dir=None,use_var_len=False,\
+              partial_shuffling=False,use_average=False, custom_loss=None):
     best_val_loss = float('inf')
     best_model = None
     name = time.strftime('{}_state_dict_%Y_%m_%d-%H_%M_%S.pth'.format(model.model_type))
@@ -24,8 +25,9 @@ def trainLoop(model, config, start_epoch, epochs, train_data, val_data, optimize
         epoch_start_time = time.time()
         train_criterion =  custom_loss if custom_loss else criterion
         model, train_loss, train_ppl = train(epoch, model, optimizer, train_criterion,
-                      train_data, ntokens, bptt, clip_gradient, device, writer=writer,\
-                          use_var_len=use_var_len,alpha = alpha, beta=beta)
+                      train_data, ntokens=ntokens, bptt=bptt, clip_gradient=clip_gradient, device=device, writer=writer,\
+                          use_var_len=use_var_len,alpha = alpha, beta=beta,\
+                              partial_shuffling=partial_shuffling, use_average=use_average)
         val_loss = evaluate(model, criterion, val_data,
                             ntokens, bptt, device)
         optimizer.schedule_step(val_loss)

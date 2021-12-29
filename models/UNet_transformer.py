@@ -17,7 +17,8 @@ class UTransformer(nn.Module):
 
     def __init__(self, ntokens: int,  d_model: int, nhead: int, dim_feedforward: int,
                  nlayers: int, drop_rate: float = 0.4,in_dropout: float=0.65, emb_dropout: float=0.1, out_dropout: float=0.4, activation: callable = torch.nn.functional.relu,\
-                      use_aux = False, weight=None, tying=False, mos:bool=True, n_experts:int=3, *args, **kwargs):
+                      use_aux = False, weight=None, tying=False, mos:bool=True, n_experts:int=3,\
+                          save_state:bool=False, adv_tr:bool=False, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self.model_type = 'U-transformer'
         self.pos_encoder = PositionalEncoding(d_model, in_dropout)
@@ -38,6 +39,8 @@ class UTransformer(nn.Module):
         self.ntokens = ntokens
         self.mos = mos
         self.n_experts = n_experts
+        self.save_state = save_state
+        self.adv_tr = adv_tr
         self.decoder = nn.Linear(d_model, ntokens)
         if self.tying:
             self.decoder.weight = self.embedding.weight
@@ -54,13 +57,6 @@ class UTransformer(nn.Module):
             self.aux_weight = weight
             self.decoder_aux = nn.Linear(d_model, ntokens)
         self.init_weights()
-        # self.bottleneck0 =  nn.Sequential(
-        #     nn.Linear(d_model, d_model), nn.Dropout(dropout))
-        # self.act = get_activation_fn(activation)
-        # self.bottleneck1 = nn.Linear(d_model, d_model)
-        #self.decoder = nn.Linear(d_model, ntokens)
-
-        #self.init_weights()
 
     def init_weights(self) -> None:
         def initialization(m):
@@ -71,11 +67,7 @@ class UTransformer(nn.Module):
                 except Exception as e:
                     pass
         self.apply(initialization)
-        # initrange = 0.1
-        # self.embedding.weight.data.uniform_(-initrange, initrange)
-        # if not self.tying:
-        #     self.decoder.bias.data.zero_()
-        #     self.decoder.weight.data.uniform_(-initrange, initrange)
+
 
     def set_dropout(self, drop_rate=0.1)-> None:
         def set_dropout_rec(model, p):
@@ -85,7 +77,7 @@ class UTransformer(nn.Module):
                 set_dropout_rec(child, p)
         set_dropout_rec(self, drop_rate)
 
-    def forward(self, src: Tensor,  src_mask: Tensor) -> Tensor:
+    def forward(self, src: Tensor,  src_mask: Tensor, h = None) -> Tensor:
         """
         Args:
             src: Tensor, shape [seq_len, batch_size]
@@ -105,9 +97,14 @@ class UTransformer(nn.Module):
             memory = layer(memory, src_mask=src_mask)
             hidden_states.append(memory)
             encoder_outputs.append(memory)
-        output = memory
+        if self.save_state:
+            output = h
+            new_h  = memory.detach()
+        else:
+            output = memory
         if self.use_aux:
             aux_output = self.decoder_aux(output)
+  
         for layer in self.transformer_decoder:
             output = layer(output, encoder_outputs.pop(),\
                         memory_mask=src_mask, tgt_mask=src_mask)  
@@ -140,4 +137,9 @@ class UTransformer(nn.Module):
 
             else:
                 output = self.decoder(output)
-        return (output, aux_output, hidden_states) if self.use_aux else (output, hidden_states)
+        outputs = [output, hidden_states]
+        if self.use_aux:
+            outputs = outputs + [aux_output]
+        if self.save_state:
+            outputs = outputs+[new_h]
+        return outputs

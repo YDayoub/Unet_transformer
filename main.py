@@ -1,3 +1,5 @@
+from tasks.pointer import evaluate_pointer
+from datasets.Data import Corpus
 import torch
 from torch import nn, Tensor
 import torch.nn.functional as F
@@ -18,12 +20,10 @@ import os
 import warnings
 from losses import custom_ce_loss
 warnings.filterwarnings('ignore')
-from datasets.Data import Corpus
-from tasks.pointer import evaluate_pointer
 
 
-def get_activation(act_func:str='relu'):
-    if act_func=='relu':
+def get_activation(act_func: str = 'relu'):
+    if act_func == 'relu':
         return nn.functional.relu_
     elif act_func == 'gelu':
         return nn.functional.gelu
@@ -33,6 +33,7 @@ def get_activation(act_func:str='relu'):
         return nn.functional.leaky_relu
     else:
         raise Exception('Please specify valid activaiton function')
+
 
 def main():
 
@@ -51,20 +52,17 @@ def main():
         checkpoint_path = args.path
         if continue_training:
             if os.path.isfile(checkpoint_path):
-                model, optimizer,  start_epoch, config = load_model(checkpoint_path)
+                model, optimizer,  start_epoch, config = load_model(
+                    checkpoint_path)
             else:
-                raise Exception('checkpoint file not found, please check the path and rerun')
+                raise Exception(
+                    'checkpoint file not found, please check the path and rerun')
         else:
             config = load_config(config_path)
-        
 
     except Exception as e:
         print('Error', e)
         exit(0)
-
-
-
-
 
     #--------------- Reproducibility -------------#
     set_seed(1111)
@@ -86,20 +84,11 @@ def main():
     use_var_len = training_config['use_var_len']
     weight_decay = float(training_config['weight_decay'])
     clip_grad_norm = training_config['clip_grad_norm']
-    d_model = model_config['d_model']  # embedding dimension
-    dim_feedforward = model_config['dim_feedforward'] 
-    nlayers = model_config['nlayers']
-    nhead = model_config['nhead']  # number of heads in nn.MultiheadAttention
-    dropout = model_config['dropout']  # dropout probability
-    emb_dropout = model_config['emb_dropout']
-    out_dropout = model_config['out_dropout']
-    in_dropout = model_config['in_dropout']
-    mos = model_config['mos']
-    activation = get_activation(model_config['activation'])  # activation function
-    
-    tying = model_config['tying']
+    use_average = training_config['use_average']
+    partial_shuffling = training_config['partial_shuffling']
     alpha = float(training_config['alpha'])
     beta = float(training_config['beta'])
+
     if dataset_config['tokenizer'] == 'char':
         if dataset_config['dataset'] == 'wiki2':
             ds = wiki2(char=True)
@@ -123,19 +112,22 @@ def main():
     test_data = batchify(test_data, eval_batch_size, device)
     ntokens = ds.get_vocab_len()  # size of source vocabulary
     print('vocab: {} tokens'.format(ntokens))
-    model_args ={'ntokens': ntokens, 'd_model':d_model, 'nhead':nhead,
-                 'dim_feedforward': dim_feedforward, 'nlayers': nlayers,
-                 'drop_rate': dropout, 'activation': activation, 'use_aux':use_aux\
-                , 'weight': weight_aux, 'tying': tying, 'emb_dropout':emb_dropout,
-                
-                'in_dropout': in_dropout,  'out_dropout': out_dropout, 'mos': mos
-                
-                }
-    model = create_model(config['model'],**model_args).to(device) if not 'model' in vars() else model
 
-    
+    activation = get_activation(model_config['activation'])  # activation fun
+    model_args = {'ntokens': ntokens, 'd_model': model_config['d_model'], 'nhead': model_config['nhead'],
+                  'dim_feedforward': model_config['dim_feedforward'], 'nlayers': model_config['nlayers'],
+                  'drop_rate': model_config['dropout'], 'activation': activation, 'use_aux': use_aux,
+                  'weight': weight_aux, 'tying': model_config['tying'], 'emb_dropout': model_config['emb_dropout'],
+                  'in_dropout': model_config['in_dropout'],  'out_dropout': model_config['out_dropout'], 'mos': model_config['mos'],
+                  'n_experts': model_config['n_experts'], 'save_state': model_config['save_state']
+                  }
+    if model_config['save_state'] and training_config['use_var_len']:
+        raise Exception('You can\'t use save_state and var_len in the same_time')
+    model = create_model(
+        config['model'], **model_args).to(device) if not 'model' in vars() else model
+
     #evaluate_pointer(model, val_data, ntokens, device)
-    
+
     pytorch_total_params = sum(p.numel()
                                for p in model.parameters() if p.requires_grad)
     print('-' * 89)
@@ -151,110 +143,89 @@ def main():
     steps_per_epoch = len(train_data)//bptt+1
     total_steps = epochs*(steps_per_epoch)
     opt_args = {
-         'lr':0,
-        'betas':(0.9, 0.98), 'eps':1e-9, 'weight_decay': weight_decay
+        'lr': 0,
+        'betas': (0.9, 0.98), 'eps': 1e-9, 'weight_decay': weight_decay
     }
-    Noam_args ={
-        'model_size':d_model,
-        'factor':1, 'warmup':8000
+    Noam_args = {
+        'model_size': model_config['d_model'],
+        'factor': 1, 'warmup': 8000
     }
     linear_args = {
         'total_steps': total_steps,
-        'pct_start':0.3, 'anneal_strategy':'linear',
-        'three_phase':True, 'max_lr':1e-3
+        'pct_start': 0.3, 'anneal_strategy': 'linear',
+        'three_phase': True, 'max_lr': 1e-3
     }
 
     Reduce_on_Plateua_args = {
-        'mode':'min',
-         'factor':0.1, 'patience': 3
+        'mode': 'min',
+        'factor': 0.1, 'patience': 3
     }
 
     CyclicLR_args = {
 
-         'base_lr': 0, 'max_lr': 1e-3, 'step_size_up': steps_per_epoch*30,
-          'step_size_down': steps_per_epoch*45, 
-          'mode': 'triangular2', 'cycle_momentum': False
-     }
-
-
-
-
-
-    
+        'base_lr': 0, 'max_lr': 1e-3, 'step_size_up': steps_per_epoch*30,
+        'step_size_down': steps_per_epoch*45,
+        'mode': 'triangular2', 'cycle_momentum': False
+    }
 
     if training_config['opt'] == 'NoamOptimizer':
-        opt = torch.optim.RAdam(model.parameters(),\
-         **opt_args)
+        opt = torch.optim.RAdam(model.parameters(),
+                                **opt_args)
         schedular_args = Noam_args
-        args = {**schedular_args, 'optimizer':opt}
+        args = {**schedular_args, 'optimizer': opt}
     elif training_config['opt'] == 'linear':
-        opt = torch.optim.RAdam(model.parameters(),\
-         **opt_args)
+        opt = torch.optim.RAdam(model.parameters(),
+                                **opt_args)
         schedular_args = linear_args
         schedular = OneCycleLR(optimizer=opt, **schedular_args)
-        args = {'schedular': schedular, 'optimizer':opt}
+        args = {'schedular': schedular, 'optimizer': opt}
     elif training_config['opt'] == 'sgd_platue':
-        opt = torch.optim.SGD(model.parameters(), lr=5, weight_decay = weight_decay)
+        opt = torch.optim.SGD(model.parameters(), lr=5,
+                              weight_decay=weight_decay)
         schedular = ReduceLROnPlateau(optimizer=opt, **Reduce_on_Plateua_args)
         schedular_args = Reduce_on_Plateua_args
-        args = {'optimizer':opt, 'schedular': schedular} 
+        args = {'optimizer': opt, 'schedular': schedular}
         opt.param_groups[0]['lr'] = 5
     elif training_config['opt'] == 'sgd_lr':
-        opt = torch.optim.SGD(model.parameters(), lr = 5)
-        scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size=1, gamma=0.95)
-        schedular_args = {'step_size':1, 'gamma':0.95}
-        args = {'optimizer':opt, 'schedular': scheduler} 
+        opt = torch.optim.SGD(model.parameters(), lr=5)
+        scheduler = torch.optim.lr_scheduler.StepLR(
+            opt, step_size=1, gamma=0.95)
+        schedular_args = {'step_size': 1, 'gamma': 0.95}
+        args = {'optimizer': opt, 'schedular': scheduler}
     elif training_config['opt'] == 'cyclic_linear':
-        opt = torch.optim.RAdam(model.parameters(),\
-         **opt_args)
+        opt = torch.optim.RAdam(model.parameters(),
+                                **opt_args)
         schedular_args = CyclicLR_args
-        scheduler = torch.optim.lr_scheduler.CyclicLR(opt, **CyclicLR_args) 
-        args = {'optimizer':opt, 'schedular': scheduler}
+        scheduler = torch.optim.lr_scheduler.CyclicLR(opt, **CyclicLR_args)
+        args = {'optimizer': opt, 'schedular': scheduler}
 
+    optimizer = create_optimizer(
+        training_config['opt'], **args) if not 'optimizer' in vars() else optimizer
 
-    optimizer = create_optimizer(training_config['opt'],**args) if not 'optimizer' in vars() else optimizer
-
-    log_dir = time.strftime('logging/{}_%Y_%m_%d-%H_%M_%S'.format(config['model']))
+    log_dir = time.strftime(
+        'logging/{}_%Y_%m_%d-%H_%M_%S'.format(config['model']))
     logging = training_config['logging']
- 
+
     if continue_training:
-        print('Continuing training from {} to {} for {} model'.format(\
+        print('Continuing training from {} to {} for {} model'.format(
             start_epoch, epochs, model.model_type))
 
-
-    
-
-    
     model, train_loss, train_ppl, val_loss, val_ppl = trainLoop(model, config, start_epoch, epochs, train_data, val_data, optimizer,
-              criterion, device, bptt, clip_grad_norm, ntokens,alpha=alpha, beta=beta,  save_model_flag=training_config['save_model']\
-                  ,adaptive_dropout = training_config['adaptive_dropout'], logging=logging, log_dir=log_dir,\
-                      use_var_len=use_var_len, custom_loss = None)
+                                                                criterion, device, bptt, clip_grad_norm, ntokens, alpha=alpha, beta=beta,  save_model_flag=training_config[
+                                                                    'save_model'], adaptive_dropout=training_config['adaptive_dropout'], logging=logging, log_dir=log_dir,
+                                                                use_var_len=use_var_len, partial_shuffling=partial_shuffling,
+                                                                use_average=use_average, custom_loss=None)
 
-
-    test_loss, test_ppl = test(model, criterion, test_data, ntokens, bptt, device)
+    test_loss, test_ppl = test(
+        model, criterion, test_data, ntokens, bptt, device)
 
     config['opt_args'] = str(opt_args)
     config['schedular_args'] = str(schedular_args)
     config['log_dir'] = log_dir if logging else ""
     config['results'] = 'test_loss {:.3f}, val_loss {:.3f}, train_loss {:.3f}\
-        test_ppl {:.3f}, val_ppl {:.3f}, train_ppl {:.3f}'.format(test_loss, val_loss, train_loss,\
-            test_ppl, val_ppl, train_ppl)
+        test_ppl {:.3f}, val_ppl {:.3f}, train_ppl {:.3f}'.format(test_loss, val_loss, train_loss,
+                                                                  test_ppl, val_ppl, train_ppl)
     log_data('logging/log.csv', config)
-
-
-    # opt = torch.optim.RAdam(model.parameters(),\
-    #      lr=0, betas=(0.9, 0.98), eps=1e-9)
-    #optimizer = torch.optim.RAdam(model.parameters(), lr=1.6e-6, weight_decay=1e-3)
-    # optimizer = CosineAnnealingWarmupRestarts(opt,\
-    #     first_cycle_steps=3*steps_per_epoch, cycle_mult=1.0, max_lr=0.001, min_lr=1e-6, warmup_steps=2*steps_per_epoch, gamma=0.5)
-    #print('total_steps: {}'.format(len(train_data)//bptt))
-    # optimizer = linearcycleWarmup(optimizer=opt, total_steps=5*len(train_data)//bptt,\
-    #      pct_start=0.8, anneal_strategy='linear', three_phase=True,\
-    #           max_lr=1e-3, steps_per_epoch=len(train_data)//bptt)
-    #optimizer = linearcycleWarmup(optimizer=opt, **linear_args)
-
-  
-    
 
 
 if __name__ == '__main__':
@@ -263,8 +234,11 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         import sys
         print('keyboard itnerrupt has been called')
-        
+
         try:
             sys.exit(0)
         except SystemExit:
             os._exit(0)
+        except Exception as e:
+            print(e)
+
