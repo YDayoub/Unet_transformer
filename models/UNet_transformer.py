@@ -18,7 +18,8 @@ class UTransformer(nn.Module):
     def __init__(self, ntokens: int,  d_model: int, nhead: int, dim_feedforward: int,
                  nlayers: int, drop_rate: float = 0.4,in_dropout: float=0.65, emb_dropout: float=0.1, out_dropout: float=0.4, activation: callable = torch.nn.functional.relu,\
                       use_aux = False, weight=None, tying=False, mos:bool=True, n_experts:int=3,\
-                          save_state:bool=False, adv_tr:bool=False, *args, **kwargs):
+                          save_state:bool=False, adv_tr:bool=False,epsilon:float=0.002,\
+                               gaussian:float=0.2, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self.model_type = 'U-transformer'
         self.pos_encoder = PositionalEncoding(d_model, in_dropout)
@@ -41,6 +42,8 @@ class UTransformer(nn.Module):
         self.n_experts = n_experts
         self.save_state = save_state
         self.adv_tr = adv_tr
+        self.epsilon = epsilon
+        self.gaussian = gaussian
         self.decoder = nn.Linear(d_model, ntokens)
         if self.tying:
             self.decoder.weight = self.embedding.weight
@@ -77,7 +80,7 @@ class UTransformer(nn.Module):
                 set_dropout_rec(child, p)
         set_dropout_rec(self, drop_rate)
 
-    def forward(self, src: Tensor,  src_mask: Tensor, h = None) -> Tensor:
+    def forward(self, src: Tensor,  src_mask: Tensor, h = None, targets = None) -> Tensor:
         """
         Args:
             src: Tensor, shape [seq_len, batch_size]
@@ -88,9 +91,13 @@ class UTransformer(nn.Module):
         """
         #src = self.embedding(src) * math.sqrt(self.d_model)
         src = self.embedding(src) 
-        # src = embedded_dropout(self.embedding, src,\
-        #    dropout=self.emb_dropout)
+        if self.training:
+            m = torch.distributions.Normal(torch.zeros_like(src), torch.ones_like(src) * 1)
+            sigma = m.sample() * self.gaussian
+            src = src + sigma
+
         memory = self.pos_encoder(src)
+        
         encoder_outputs = []
         hidden_states = []
         for layer in self.transformer_encoder:
@@ -112,31 +119,35 @@ class UTransformer(nn.Module):
             hidden_states.append(output)
         
         ####### outputs ######
-        
-        #output = self.dropout(output)
         if self.mos:
             shape = output.shape
             prior = self.prior(output).contiguous()
             prior = nn.functional.softmax(prior, -1)
             latent = self.latent(output).view(shape[0], shape[1],self.n_experts,-1).contiguous()
-
-  
-        if self.tying:
-            if self.mos:
-                logits = F.linear(latent, self.decoder.weight, self.decoder.bias)
-                prob = nn.functional.softmax(logits, -1)
-                output = torch.einsum('ijk,ijkl->ijl',prior,prob)
-            else:
-                output = F.linear(output, self.decoder.weight, self.decoder.bias)
-        else:  
-            if self.mos:
-                logits = self.decoder(latent)
-                prob = nn.functional.softmax(logits, -1)
-                output = torch.einsum('ijk,ijkl->ijl',prior,prob)
-                output = torch.log(output.add_(1e-8))
-
-            else:
-                output = self.decoder(output)
+        else:
+            latent = output
+        if self.adv_tr and self.training:
+            logits = self.decoder(latent.view(-1, self.d_model))
+            _latent = latent.view(-1, self.d_model)
+            targets = targets.view([-1, 1]).expand([-1, self.n_experts]).contiguous().view(-1)
+            weight_noise = torch.zeros_like(self.decoder.weight).cuda()
+            neg_h = -_latent / torch.sqrt(torch.sum(_latent**2, 1, keepdim=True) + 1e-8)
+            n_output = torch.sqrt(torch.sum(_latent**2, 1, keepdim=True) + 1e-8)
+            n_w = torch.sqrt(torch.sum(self.embedding(targets)**2, 1, keepdim=True) + 1e-8)
+            cos_theta = (torch.sum(_latent * self.embedding(targets), 1, keepdim=True)) / n_output / n_w
+            indicator = torch.gt(cos_theta, 0e-1).view(-1, 1).type(torch.cuda.FloatTensor)
+            sigma = self.epsilon * n_w * indicator
+            weight_noise[targets.view(-1)] = sigma.detach() * neg_h.detach()
+            noise_outputs = (_latent * weight_noise[targets]).sum(1)
+            logits[torch.arange(targets.size(0)).long().cuda(), targets] += noise_outputs
+        else:
+            logits = self.decoder(latent)
+        if self.mos:
+            prob = nn.functional.softmax(logits, -1).view(shape[0], shape[1], self.n_experts, self.ntokens)
+            output = torch.einsum('ijk,ijkl->ijl',prior,prob)
+            output = torch.log(output.add_(1e-8))
+        else:
+            output = logits
         outputs = [output, hidden_states]
         if self.use_aux:
             outputs = outputs + [aux_output]

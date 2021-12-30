@@ -48,7 +48,7 @@ def train(epoch, model, optimizer, criterion, train_data,
             prev_h = prev_h[-batch_size:,:,:]
 
         src_mask = generate_square_subsequent_mask(batch_size).to(device)
-        outputs = model(data, src_mask, prev_h)
+        outputs = model(data, src_mask, prev_h,targets=targets)
         output, hidden_states = outputs[0], outputs[1]
         main_loss = criterion(output.view(-1, ntokens), targets)
         loss = 1.0*main_loss
