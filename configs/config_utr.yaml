@@ -23,7 +23,7 @@ training:
   opt: 'linear' # linear, NoamOptimizer, sgd_platue, cyclic_linear, 
   n_epochs : 100
   batch_size:  20
-  bptt: 128
+  bptt: 160
   clip_grad_norm: 0.5
   use_aux: False
   adaptive_dropout: False

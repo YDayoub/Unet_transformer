@@ -7,6 +7,7 @@ import copy
 import os
 from torch.utils.tensorboard import SummaryWriter
 from utils.util import save_model
+from models.EMA import ema
 
 def trainLoop(model, config, start_epoch, epochs, train_data, val_data, optimizer, criterion,\
      device, bptt, clip_gradient, ntokens, alpha, beta, save_model_flag=True,\
@@ -14,6 +15,8 @@ def trainLoop(model, config, start_epoch, epochs, train_data, val_data, optimize
               partial_shuffling=False,use_average=False, custom_loss=None):
     best_val_loss = float('inf')
     best_model = None
+    if use_average:
+        ema_model = None
     name = time.strftime('{}_state_dict_%Y_%m_%d-%H_%M_%S.pth'.format(model.model_type))
     writer = SummaryWriter(log_dir=log_dir) if logging else None
     for epoch in range(start_epoch, epochs + 1):
@@ -30,7 +33,20 @@ def trainLoop(model, config, start_epoch, epochs, train_data, val_data, optimize
                               partial_shuffling=partial_shuffling, use_average=use_average)
         val_loss = evaluate(model, criterion, val_data,
                             ntokens, bptt, device)
+
         optimizer.schedule_step(val_loss)
+        if use_average:
+            if ema_model is None:
+                ema_model = ema(model, decay_rate=0.9)
+            else:
+                ema_model(model)
+
+        if math.exp(val_loss)<61:
+            if use_average:
+                ema_model.set_model_to_ema(model)
+
+
+
         
         val_ppl = math.exp(val_loss)
         elapsed = time.time() - epoch_start_time

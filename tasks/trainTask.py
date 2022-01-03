@@ -32,6 +32,7 @@ def train(epoch, model, optimizer, criterion, train_data,
     if use_average:
         ema_model = None
     if partial_shuffling:
+        print('parital shuffing')
         train_data = partial_shuffle(train_data)
     prev_h = None
 
@@ -111,7 +112,7 @@ def train(epoch, model, optimizer, criterion, train_data,
         batch += 1
         i += seq_len
         gc.collect()
-    if use_average:
-        ema_model.set_model_to_ema(model)
-        del ema_model
+    # if use_average:
+    #     ema_model.set_model_to_ema(model)
+    #     del ema_model
     return model, cur_loss, math.exp(cur_loss)

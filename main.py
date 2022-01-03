@@ -72,10 +72,12 @@ def main():
     model_config = config['model_config']
     training_config = config['training']
     eval_config = config['eval']
+    test_config = config['test']
     dataset_config = config['dataset_config']
     #---------------loadconfig--------------------#
     train_batch_size = training_config['batch_size']
     eval_batch_size = eval_config['batch_size']
+    test_batch_size = test_config['batch_size']
     epochs = training_config['n_epochs']
     start_epoch = 1 if not 'start_epoch' in vars() else start_epoch
     bptt = training_config['bptt']
@@ -109,7 +111,7 @@ def main():
     train_data = batchify(train_data, train_batch_size,
                           device)  # shape [seq_len, batch_size]
     val_data = batchify(val_data, eval_batch_size, device)
-    test_data = batchify(test_data, eval_batch_size, device)
+    test_data = batchify(test_data, test_batch_size, device)
     ntokens = ds.get_vocab_len()  # size of source vocabulary
     print('vocab: {} tokens'.format(ntokens))
 
@@ -139,6 +141,7 @@ def main():
 
     if model.mos:
         criterion = nn.functional.nll_loss
+        print('I am here')
     else:
         criterion = nn.CrossEntropyLoss()
     custom_loss = custom_ce_loss(num_classes=ntokens, power=2)
