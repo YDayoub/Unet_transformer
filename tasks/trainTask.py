@@ -37,18 +37,17 @@ def train(epoch, model, optimizer, criterion, train_data,
     prev_h = None
 
     while i < train_data.size(0) - 1 - 1:
-        seq_len = get_sequence_length(bptt, use_var_len)
-        data, targets = get_batch(train_data, i, seq_len)
+        data, targets = get_batch(train_data, i, get_sequence_length(bptt, use_var_len))
         curent_index = num_batches*epoch+batch
-        batch_size = data.size(0)
+        seq_length = data.size(0)
         if prev_h is None and model.save_state:
             shape = data.shape
-            prev_h = torch.randn(
+            prev_h = torch.zeros(
                 (shape[0], shape[1], model.d_model), device='cuda')
-        elif prev_h is not None and prev_h.shape[0] != batch_size:
-            prev_h = prev_h[-batch_size:,:,:]
+        elif prev_h is not None and prev_h.shape[0] != seq_length:
+            prev_h = prev_h[-seq_length:,:,:]
 
-        src_mask = generate_square_subsequent_mask(batch_size).to(device)
+        src_mask = generate_square_subsequent_mask(seq_length).to(device)
         outputs = model(data, src_mask, prev_h,targets=targets)
         output, hidden_states = outputs[0], outputs[1]
         main_loss = criterion(output.view(-1, ntokens), targets)
@@ -68,7 +67,7 @@ def train(epoch, model, optimizer, criterion, train_data,
                            for h in hidden_states)
             loss += tar_loss
 
-        scale_lr = batch_size/bptt
+        scale_lr = seq_length/bptt
         optimizer.scalar = scale_lr
 
         optimizer.zero_grad()
@@ -93,6 +92,8 @@ def train(epoch, model, optimizer, criterion, train_data,
                                              'lr': optimizer.lr, 'dropout': model.dropout_val}, curent_index)
 
         if batch % log_interval == 0 and batch > 0:
+            if model.weighted_connections:
+                print('skip_weights {}'.format(model.skip_weights))
             lr = optimizer.lr
             ms_per_batch = (time.time() - start_time) * 1000 / log_interval
             cur_loss = total_loss / log_interval
@@ -100,7 +101,7 @@ def train(epoch, model, optimizer, criterion, train_data,
             ppl = math.exp(cur_loss_main)
             print(f'| epoch {epoch:3d} | {batch:5d}/{num_batches:5d} batches | '
                   f'lr {lr:02.8f} | ms/batch {ms_per_batch:5.2f} | '
-                  f'loss {cur_loss:5.6f} |loss_main {cur_loss_main:5.6f} | ppl {ppl:8.6f}| seq_len {batch_size:5d}')
+                  f'loss {cur_loss:5.6f} |loss_main {cur_loss_main:5.6f} | ppl {ppl:8.6f}| seq_len {seq_length:5d}')
             total_loss = 0.0
             total_loss_main = 0.0
             start_time = time.time()
@@ -110,7 +111,7 @@ def train(epoch, model, optimizer, criterion, train_data,
                 else:
                     ema_model(model)
         batch += 1
-        i += seq_len
+        i += seq_length
         gc.collect()
     # if use_average:
     #     ema_model.set_model_to_ema(model)

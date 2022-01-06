@@ -12,7 +12,8 @@ __factory = {
     'NoamOptimizer': NoamOpt,
     'sgd_platue': SGDRPLateu,
     'sgd_lr': SGDLR,
-    'cyclic_linear': CyclicLR
+    'cyclic_linear': CyclicLR,
+    'RAdam_platue': SGDRPLateu
 }
 
 

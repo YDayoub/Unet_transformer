@@ -1,5 +1,6 @@
 from tasks.pointer import evaluate_pointer
 from datasets.Data import Corpus
+from datasets.Data2 import Corpus_subword
 import torch
 from torch import nn, Tensor
 import torch.nn.functional as F
@@ -96,6 +97,14 @@ def main():
             ds = wiki2(char=True)
         else:
             ds = wiki103(char=True)
+    elif dataset_config['tokenizer'] == 'subword':
+        subword_path = '/home/admin/datasets/subwords.pb'
+        if os.path.isfile(subword_path):
+            ds  = torch.load(subword_path)['corpus']
+        else:
+            print('Creating subwords')
+            ds = Corpus_subword('/home/admin/datasets/wikitext-2')
+            torch.save({'corpus': ds}, subword_path)
     else:
         tokenizer = get_tokenizer(dataset_config['tokenizer'])
         if dataset_config['dataset'] == 'wiki2':
@@ -106,8 +115,6 @@ def main():
     print('Training On Device: {}'.format(device))
     #------------------loading_dataset-----------------#
     (train_data, val_data, test_data) = ds.get_all_data()
-    # ds = Corpus('/home/admin/datasets/wikitext-2')
-    # (train_data, val_data, test_data) = ds.train, ds.valid, ds.test
     train_data = batchify(train_data, train_batch_size,
                           device)  # shape [seq_len, batch_size]
     val_data = batchify(val_data, eval_batch_size, device)
@@ -123,7 +130,7 @@ def main():
                   'in_dropout': model_config['in_dropout'],  'out_dropout': model_config['out_dropout'], 'mos': model_config['mos'],
                   'n_experts': model_config['n_experts'], 'save_state': model_config['save_state'],\
                   'adv_tr': model_config['adv_tr'], 'epsilon': model_config['epsilon'],\
-                  'gaussian': model_config['gaussian']
+                  'gaussian': model_config['gaussian'], 'weighted_connections': model_config['weighted_connections']
                   }
     if model_config['save_state'] and training_config['use_var_len']:
         raise Exception('You can\'t use save_state and var_len in the same_time')
@@ -141,7 +148,6 @@ def main():
 
     if model.mos:
         criterion = nn.functional.nll_loss
-        print('I am here')
     else:
         criterion = nn.CrossEntropyLoss()
     custom_loss = custom_ce_loss(num_classes=ntokens, power=2)
@@ -187,6 +193,14 @@ def main():
     elif training_config['opt'] == 'sgd_platue':
         opt = torch.optim.SGD(model.parameters(), lr=5,
                               weight_decay=weight_decay)
+
+        schedular = ReduceLROnPlateau(optimizer=opt, **Reduce_on_Plateua_args)
+        schedular_args = Reduce_on_Plateua_args
+        args = {'optimizer': opt, 'schedular': schedular}
+    elif training_config['opt'] == 'RAdam_platue':
+
+        opt = torch.optim.RAdam(model.parameters(),lr= 1e-4,\
+            betas=(0.9, 0.98), eps= 1e-9, weight_decay= weight_decay)
         schedular = ReduceLROnPlateau(optimizer=opt, **Reduce_on_Plateua_args)
         schedular_args = Reduce_on_Plateua_args
         args = {'optimizer': opt, 'schedular': schedular}
@@ -230,7 +244,8 @@ def main():
     config['results'] = 'test_loss {:.3f}, val_loss {:.3f}, train_loss {:.3f}\
         test_ppl {:.3f}, val_ppl {:.3f}, train_ppl {:.3f}'.format(test_loss, val_loss, train_loss,
                                                                   test_ppl, val_ppl, train_ppl)
-    log_data('logging/log.csv', config)
+    if logging:
+        log_data('logging/log.csv', config)
 
 
 if __name__ == '__main__':

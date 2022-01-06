@@ -4,26 +4,27 @@ model_config:
   dim_feedforward : 1024 
   nlayers : 2
   nhead : 16
-  dropout : 0.2
+  dropout : 0.4
   emb_dropout: 0.2
-  out_dropout: 0.2 
+  out_dropout: 0.4 
   in_dropout: 0.2
   activation : 'relu'
   tying: False
   mos: False
   save_state: False
   adv_tr: False
+  weighted_connections: False
   n_experts: 1
   gaussian: 0.2
   epsilon: 0.005
 dataset_config:
-  tokenizer: 'spacy' # spacy, basic_english, char
+  tokenizer: 'subword' # spacy, basic_english, char, subword
   dataset: 'wiki2' # wiki2, wiki103
 training:
-  opt: 'linear' # linear, NoamOptimizer, sgd_platue, cyclic_linear, 
+  opt: 'linear' # linear, NoamOptimizer, sgd_platue, cyclic_linear,  RAdam_platue
   n_epochs : 100
   batch_size:  20
-  bptt: 160
+  bptt: 256
   clip_grad_norm: 0.5
   use_aux: False
   adaptive_dropout: False
