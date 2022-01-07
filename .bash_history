@@ -336,3 +336,24 @@ python3 main.py --config /home/admin/configs/config_utr.yaml
 python3 main.py --config /home/admin/configs/config_utr.yaml
 python3 main.py --config /home/admin/configs/config_utr.yaml
 clear
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+git add .
+git commit -m 'added modifications to v-tr'
+git push -u origin
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+git add .
+git commit -m 'disable printing
+'
+git push -u origin
+clear

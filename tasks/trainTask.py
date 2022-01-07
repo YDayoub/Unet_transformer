@@ -120,7 +120,6 @@ def train(epoch, model, optimizer, criterion, train_data,
         batch += 1
         i += seq_length
         gc.collect()
-        torch.cuda.empty_cache()
 
     # if use_average:
     #     ema_model.set_model_to_ema(model)

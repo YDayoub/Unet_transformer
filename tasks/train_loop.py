@@ -70,7 +70,7 @@ def trainLoop(model, config, start_epoch, epochs, train_data, val_data, optimize
             best_val_loss = val_loss
             best_model = copy.deepcopy(model)
         if save_model_flag:
-            fpath = os.path.join('checkpoints', name)
+            fpath = os.path.join(log_dir, name)
             checkpoints = {
                 'model': best_model,
                 'configs': config,
@@ -87,35 +87,3 @@ def trainLoop(model, config, start_epoch, epochs, train_data, val_data, optimize
     return model, train_loss, train_ppl, val_loss, val_ppl
 
 
-# print('-' * 89)
-#     nb_ex = epochs//10
-#     steps_per_epoch = len(train_data)//bptt
-#     total_steps = epochs*(steps_per_epoch)
-#     max_lr = 1e-3
-#     gamma = 1
-#     for i in range(nb_ex):
-#       print('--------------{}---------------'.format(i+1))
-#       criterion = nn.CrossEntropyLoss()
-#       local_steps = steps_per_epoch*(10+3)
-#       opt = torch.optim.RAdam(model.parameters(),\
-#           lr=0, betas=(0.9, 0.98), eps=1e-9, weight_decay=1e-5)
-#       # opt = torch.optim.SGD(model.parameters(),\
-#       #      lr=0, momentum = 0.9)
-#       #optimizer = NoamOpt(model_size=d_model, factor=1, warmup=8000, optimizer=opt)
-#       #optimizer = torch.optim.RAdam(model.parameters(), lr=1.6e-6, weight_decay=1e-3)
-#       # optimizer = CosineAnnealingWarmupRestarts(opt,\
-#       #     first_cycle_steps=int(0.5*total_steps), cycle_mult=1.1, max_lr=max_lr, min_lr=max_lr/25, warmup_steps=int(0.3*total_steps), gamma=0.5)
-#       #print('total_steps: {}'.format(len(train_data)//bptt))
-#       # optimizer = linearcycleWarmup(optimizer=opt, total_steps=5*len(train_data)//bptt,\
-#       #      pct_start=0.8, anneal_strategy='linear', three_phase=True,\
-#       #           max_lr=1e-3, steps_per_epoch=len(train_data)//bptt)
-#       optimizer = linearcycleWarmup(optimizer=opt, total_steps=local_steps,\
-#           pct_start=0.4, anneal_strategy='linear', three_phase=True,\
-#               max_lr=max_lr*gamma)
-#       gamma *=0.1
-      
-
-#       trainLoop(model, 10, train_data, val_data, optimizer,
-#                 criterion, device, bptt, clip_grad_norm, ntokens,  save_model=False)
-
-#     test(model, criterion, test_data, ntokens, bptt, device)

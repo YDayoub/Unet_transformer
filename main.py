@@ -67,8 +67,7 @@ def main():
 
     #--------------- Reproducibility -------------#
     set_seed(1111)
-    config = {**config, 'seed': 1111}
-    print(config)
+    config['seed'] = 1111
     #---------------                  -------------#
     model_config = config['model_config']
     training_config = config['training']
@@ -127,7 +126,7 @@ def main():
     model_args = {'ntokens': ntokens, 'd_model': model_config['d_model'], 'nhead': model_config['nhead'],
                   'dim_feedforward': model_config['dim_feedforward'], 'nlayers': model_config['nlayers'],
                   'drop_rate': model_config['dropout'], 'activation': activation, 'use_aux': use_aux,
-                  'weight': weight_aux, 'tying': model_config['tying'], 'emb_dropout': model_config['emb_dropout'],
+                  'weight': weight_aux, 'tying': model_config['tying'], 
                   'in_dropout': model_config['in_dropout'],  'out_dropout': model_config['out_dropout'], 'mos': model_config['mos'],
                   'n_experts': model_config['n_experts'], 'save_state': model_config['save_state'],\
                   'adv_tr': model_config['adv_tr'], 'epsilon': model_config['epsilon'],\

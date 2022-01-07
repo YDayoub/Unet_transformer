@@ -17,7 +17,7 @@ def get_activation_fn(activation):
 class VanillaTransformer(nn.Module):
 
     def __init__(self, ntokens: int,  d_model: int, nhead: int, dim_feedforward: int,
-                 nlayers: int, drop_rate: float = 0.4, in_dropout: float = 0.65, emb_dropout: float = 0.1, out_dropout: float = 0.4, activation: callable = torch.nn.functional.relu,
+                 nlayers: int, drop_rate: float = 0.4, in_dropout: float = 0.65,  out_dropout: float = 0.4, activation: callable = torch.nn.functional.relu,
                  use_aux=False, weight=None, tying=False, mos: bool = True, n_experts: int = 3,
                  save_state: bool = False, adv_tr: bool = False, epsilon: float = 0.002,
                  gaussian: float = 0.2, weighted_connections=False, use_gru=False, ar_tar=False, *args, **kwargs):
@@ -33,10 +33,8 @@ class VanillaTransformer(nn.Module):
                                                                           dim_feedforward=dim_feedforward,
                                                                           dropout=drop_rate, activation=activation)
                                                   for _ in range(nlayers)])
-        # here I added scale_grad_by_freq
         self.embedding = nn.Embedding(ntokens, d_model)
         self.dropout = nn.Dropout(out_dropout)
-        self.emb_dropout = emb_dropout
         self.d_model = d_model
         self.tying = tying
         self.ntokens = ntokens
@@ -51,9 +49,10 @@ class VanillaTransformer(nn.Module):
         self.gaussian = gaussian
         self.decoder = nn.Linear(d_model, ntokens)
         if self.use_gru:
-            self.gru = nn.GRU(input_size=d_model, hidden_size=d_model, batch_first=False)
+            self.gru = nn.GRU(input_size=d_model,
+                              hidden_size=d_model, batch_first=False)
         if weighted_connections:
-            self.skip_weights = nn.Parameter(torch.ones(nlayers,nlayers))
+            self.skip_weights = nn.Parameter(torch.ones(nlayers, nlayers))
         if self.tying:
             self.decoder.weight = self.embedding.weight
         if self.mos:
@@ -72,7 +71,8 @@ class VanillaTransformer(nn.Module):
     def init_weights(self) -> None:
         def initialization(m):
             if isinstance(m, nn.Linear):
-                torch.nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='relu')
+                torch.nn.init.kaiming_normal_(
+                    m.weight, mode='fan_in', nonlinearity='relu')
                 try:
                     m.bias.data.fill_(0.01)
                 except Exception as e:
@@ -112,8 +112,8 @@ class VanillaTransformer(nn.Module):
             src = src + sigma
         memory = self.pos_encoder(src)
         if self.use_gru:
-            h0_new, _ = self.gru(src[:1,:,:], h)
-            src[:1,:,:] = h0_new
+            h0_new, _ = self.gru(src[:1, :, :], h)
+            src[:1, :, :] = h0_new
         if self.ar_tar:
             hidden_states = []
         for layer in self.transformer_encoder:
@@ -131,7 +131,7 @@ class VanillaTransformer(nn.Module):
             if self.ar_tar:
                 hidden_states.append(output)
         if self.use_gru:
-            new_h = output[-1:,:,:].detach()
+            new_h = output[-1:, :, :].detach()
 
         output = self.dropout(output)
 
@@ -176,7 +176,7 @@ class VanillaTransformer(nn.Module):
             output = logits
         outputs = [output]
         if self.ar_tar:
-            outputs = outputs+ [hidden_states]
+            outputs = outputs + [hidden_states]
         if self.use_aux:
             outputs = outputs + [aux_output]
         # if self.save_state:
