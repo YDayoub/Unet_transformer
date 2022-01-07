@@ -130,7 +130,8 @@ def main():
                   'in_dropout': model_config['in_dropout'],  'out_dropout': model_config['out_dropout'], 'mos': model_config['mos'],
                   'n_experts': model_config['n_experts'], 'save_state': model_config['save_state'],\
                   'adv_tr': model_config['adv_tr'], 'epsilon': model_config['epsilon'],\
-                  'gaussian': model_config['gaussian'], 'weighted_connections': model_config['weighted_connections']
+                  'gaussian': model_config['gaussian'], 'weighted_connections': model_config['weighted_connections'],
+                  'use_gru': model_config['use_gru'], 'ar_tar': model_config['ar_tar']
                   }
     if model_config['save_state'] and training_config['use_var_len']:
         raise Exception('You can\'t use save_state and var_len in the same_time')

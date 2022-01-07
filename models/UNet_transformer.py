@@ -21,7 +21,7 @@ class UTransformer(nn.Module):
                  nlayers: int, drop_rate: float = 0.4, in_dropout: float = 0.65, emb_dropout: float = 0.1, out_dropout: float = 0.4, activation: callable = torch.nn.functional.relu,
                  use_aux=False, weight=None, tying=False, mos: bool = True, n_experts: int = 3,
                  save_state: bool = False, adv_tr: bool = False, epsilon: float = 0.002,
-                 gaussian: float = 0.2, weighted_connections=False, *args, **kwargs):
+                 gaussian: float = 0.2, weighted_connections=False, use_gru=False, ar_tar=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.model_type = 'U-transformer'
         self.pos_encoder = PositionalEncoding(d_model, in_dropout)
@@ -43,11 +43,15 @@ class UTransformer(nn.Module):
         self.mos = mos
         self.n_experts = n_experts
         self.save_state = save_state
+        self.use_gru = use_gru
         self.adv_tr = adv_tr
+        self.ar_tar = ar_tar
         self.weighted_connections = weighted_connections
         self.epsilon = epsilon
         self.gaussian = gaussian
         self.decoder = nn.Linear(d_model, ntokens)
+        if self.use_gru:
+            self.gru = nn.GRU(input_size=d_model, hidden_size=d_model, batch_first=False)
         if weighted_connections:
             self.skip_weights = nn.Parameter(torch.ones(nlayers,nlayers))
         if self.tying:
@@ -94,24 +98,31 @@ class UTransformer(nn.Module):
             output Tensor of shape [seq_len, batch_size, ntoken]
         """
         src = self.embedding(src) * math.sqrt(self.d_model)
-        #src = self.embedding(src)
+
         if self.training and self.adv_tr:
             m = torch.distributions.Normal(
                 torch.zeros_like(src), torch.ones_like(src) * 1.)
             sigma = m.sample() * self.gaussian
             src = src + sigma
         memory = self.pos_encoder(src)
+        if self.use_gru:
+            h0_new, _ = self.gru(src[:1,:,:], h)
+            src[:1,:,:] = h0_new
 
         encoder_outputs = []
-        hidden_states = []
+        if self.ar_tar:
+            hidden_states = []
         for layer in self.transformer_encoder:
             memory = layer(memory, src_mask=src_mask)
-            hidden_states.append(memory)
+            if self.ar_tar:
+                hidden_states.append(memory)
             encoder_outputs.append(memory)
-        states = torch.stack(encoder_outputs)
+        if self.weighted_connections:
+            states = torch.stack(encoder_outputs)
         if self.save_state:
-            output = h
-            new_h = memory.detach()
+            raise Exception('save_state doesn\'t work')
+            # output = h
+            # new_h = memory.detach()
         else:
             output = memory
         if self.use_aux:
@@ -130,8 +141,10 @@ class UTransformer(nn.Module):
                            memory_mask=src_mask, tgt_mask=src_mask)
             # output = layer(output, encoder_outputs.pop(),
             #                memory_mask=src_mask, tgt_mask=src_mask)
-
-            hidden_states.append(output)
+            if self.ar_tar:
+                hidden_states.append(output)
+        if self.use_gru:
+            new_h = output[-1:,:,:].detach()
 
         output = self.dropout(output)
 
@@ -174,9 +187,13 @@ class UTransformer(nn.Module):
             output = torch.log(output.add_(1e-8))
         else:
             output = logits
-        outputs = [output, hidden_states]
+        outputs = [output]
+        if self.ar_tar:
+            outputs = outputs+ [hidden_states]
         if self.use_aux:
             outputs = outputs + [aux_output]
-        if self.save_state:
+        # if self.save_state:
+        #     outputs = outputs+[new_h]
+        if self.use_gru:
             outputs = outputs+[new_h]
         return outputs

@@ -40,23 +40,27 @@ def train(epoch, model, optimizer, criterion, train_data,
         data, targets = get_batch(train_data, i, get_sequence_length(bptt, use_var_len))
         curent_index = num_batches*epoch+batch
         seq_length = data.size(0)
-        if prev_h is None and model.save_state:
+        # if prev_h is None and model.save_state:
+        if prev_h is None and model.use_gru:
             shape = data.shape
             prev_h = torch.zeros(
-                (shape[0], shape[1], model.d_model), device='cuda')
-        elif prev_h is not None and prev_h.shape[0] != seq_length:
-            prev_h = prev_h[-seq_length:,:,:]
+                (1, shape[1], model.d_model), device='cuda')
+        # elif prev_h is not None and prev_h.shape[0] != seq_length:
+        #     prev_h = prev_h[-seq_length:,:,:]
 
         src_mask = generate_square_subsequent_mask(seq_length).to(device)
         outputs = model(data, src_mask, prev_h,targets=targets)
-        output, hidden_states = outputs[0], outputs[1]
+        output = outputs[0] 
+        if alpha or beta:
+            hidden_states = outputs[1]
         main_loss = criterion(output.view(-1, ntokens), targets)
         loss = 1.0*main_loss
         if model.use_aux:
             aux_output = outputs[2]
             aux_loss = criterion(aux_output.view(-1, ntokens), data.view(-1))
             loss += model.aux_weight * aux_loss
-        if model.save_state:
+        # if model.save_state:
+        if model.use_gru:
             prev_h = outputs[-1]
 
         if alpha:
@@ -113,6 +117,8 @@ def train(epoch, model, optimizer, criterion, train_data,
         batch += 1
         i += seq_length
         gc.collect()
+        torch.cuda.empty_cache()
+
     # if use_average:
     #     ema_model.set_model_to_ema(model)
     #     del ema_model
