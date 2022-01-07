@@ -12,7 +12,7 @@ from models.EMA import ema
 def trainLoop(model, config, start_epoch, epochs, train_data, val_data, optimizer, criterion,\
      device, bptt, clip_gradient, ntokens, alpha, beta, save_model_flag=True,\
           adaptive_dropout=False, logging=False, log_dir=None,use_var_len=False,\
-              partial_shuffling=False,use_average=False, custom_loss=None):
+              partial_shuffling=False,use_average=False, printing=True, custom_loss=None):
     best_val_loss = float('inf')
     best_model = None
     if use_average:
@@ -30,7 +30,7 @@ def trainLoop(model, config, start_epoch, epochs, train_data, val_data, optimize
         model, train_loss, train_ppl = train(epoch, model, optimizer, train_criterion,
                       train_data, ntokens=ntokens, bptt=bptt, clip_gradient=clip_gradient, device=device, writer=writer,\
                           use_var_len=use_var_len,alpha = alpha, beta=beta,\
-                              partial_shuffling=partial_shuffling, use_average=use_average)
+                              partial_shuffling=partial_shuffling, use_average=use_average, printing=printing)
         val_loss = evaluate(model, criterion, val_data,
                             ntokens, bptt, device)
 
@@ -50,11 +50,11 @@ def trainLoop(model, config, start_epoch, epochs, train_data, val_data, optimize
         
         val_ppl = math.exp(val_loss)
         elapsed = time.time() - epoch_start_time
-
-        print('-' * 89)
-        print(f'| end of epoch {epoch:3d} | time: {elapsed:5.2f}s | '
-              f'valid loss {val_loss:5.6f} | valid ppl {val_ppl:8.6f}')
-        print('-' * 89)
+        if printing:
+            print('-' * 89)
+            print(f'| end of epoch {epoch:3d} | time: {elapsed:5.2f}s | '
+                f'valid loss {val_loss:5.6f} | valid ppl {val_ppl:8.6f}')
+            print('-' * 89)
         if writer:
             writer.add_scalar('val/loss', val_loss, epoch)
             writer.add_scalar('val/ppl', val_ppl, epoch)

@@ -20,7 +20,8 @@ def get_sequence_length(bptt, use_var_length):
 
 
 def train(epoch, model, optimizer, criterion, train_data,
-          ntokens, bptt, clip_gradient, device, alpha, beta, use_average, partial_shuffling, writer=None, use_var_len=False):
+          ntokens, bptt, clip_gradient, device, alpha, beta, use_average, partial_shuffling, \
+              printing=True, writer=None, use_var_len=False):
     model.train()  # turn on train mode
     total_loss = 0.
     total_loss_main = 0.
@@ -96,16 +97,18 @@ def train(epoch, model, optimizer, criterion, train_data,
                                              'lr': optimizer.lr, 'dropout': model.dropout_val}, curent_index)
 
         if batch % log_interval == 0 and batch > 0:
-            if model.weighted_connections:
+
+            if model.weighted_connections and printing:
                 print('skip_weights {}'.format(model.skip_weights))
             lr = optimizer.lr
             ms_per_batch = (time.time() - start_time) * 1000 / log_interval
             cur_loss = total_loss / log_interval
             cur_loss_main = total_loss_main / log_interval
             ppl = math.exp(cur_loss_main)
-            print(f'| epoch {epoch:3d} | {batch:5d}/{num_batches:5d} batches | '
-                  f'lr {lr:02.8f} | ms/batch {ms_per_batch:5.2f} | '
-                  f'loss {cur_loss:5.6f} |loss_main {cur_loss_main:5.6f} | ppl {ppl:8.6f}| seq_len {seq_length:5d}')
+            if printing:
+                print(f'| epoch {epoch:3d} | {batch:5d}/{num_batches:5d} batches | '
+                    f'lr {lr:02.8f} | ms/batch {ms_per_batch:5.2f} | '
+                    f'loss {cur_loss:5.6f} |loss_main {cur_loss_main:5.6f} | ppl {ppl:8.6f}| seq_len {seq_length:5d}')
             total_loss = 0.0
             total_loss_main = 0.0
             start_time = time.time()

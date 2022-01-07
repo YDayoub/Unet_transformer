@@ -82,6 +82,7 @@ def main():
     epochs = training_config['n_epochs']
     start_epoch = 1 if not 'start_epoch' in vars() else start_epoch
     bptt = training_config['bptt']
+    printing = training_config['printing']
     use_aux = training_config['use_aux']
     weight_aux = training_config['weight_aux']
     use_var_len = training_config['use_var_len']
@@ -234,7 +235,7 @@ def main():
                                                                 criterion, device, bptt, clip_grad_norm, ntokens, alpha=alpha, beta=beta,  save_model_flag=training_config[
                                                                     'save_model'], adaptive_dropout=training_config['adaptive_dropout'], logging=logging, log_dir=log_dir,
                                                                 use_var_len=use_var_len, partial_shuffling=partial_shuffling,
-                                                                use_average=use_average, custom_loss=None)
+                                                                use_average=use_average, printing=printing, custom_loss=None)
 
     test_loss, test_ppl = test(
         model, criterion, test_data, ntokens, bptt, device)
