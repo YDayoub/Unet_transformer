@@ -63,6 +63,7 @@ def train(epoch, model, optimizer, criterion, train_data,
         # if model.save_state:
         if model.use_gru:
             prev_h = outputs[-1]
+            #print('prev_h {}'.format(prev_h.shape))
 
         if alpha:
             ar_loss = sum(alpha * h.pow(2).mean() for h in hidden_states)
@@ -87,8 +88,8 @@ def train(epoch, model, optimizer, criterion, train_data,
             writer.add_scalars('train/loss', {'main_loss': main_loss.item(),
                                               'aux_loss': aux_loss.item(), 'loss': loss.item()}, curent_index)
             writer.add_scalar('lr', optimizer.lr, curent_index)
-            writer.add_scalars('train/ppl', {'train_ppl/100':  math.exp(main_loss.item(
-            ))/100, 'lr': optimizer.lr, 'dropout': model.dropout_val}, curent_index)
+            writer.add_scalars('train/ppl', {'train_ppl':  math.exp(main_loss.item(
+            )), 'lr': optimizer.lr, 'dropout': model.dropout_val}, curent_index)
 
         elif writer:
             writer.add_scalar('train/lr', optimizer.lr, curent_index)
@@ -119,7 +120,6 @@ def train(epoch, model, optimizer, criterion, train_data,
                     ema_model(model)
         batch += 1
         i += seq_length
-        gc.collect()
 
     # if use_average:
     #     ema_model.set_model_to_ema(model)

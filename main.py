@@ -68,6 +68,7 @@ def main():
     #--------------- Reproducibility -------------#
     set_seed(1111)
     config['seed'] = 1111
+    print(config)
     #---------------                  -------------#
     model_config = config['model_config']
     training_config = config['training']
@@ -123,16 +124,17 @@ def main():
     print('vocab: {} tokens'.format(ntokens))
 
     activation = get_activation(model_config['activation'])  # activation fun
+
     model_args = {'ntokens': ntokens, 'd_model': model_config['d_model'], 'nhead': model_config['nhead'],
-                  'dim_feedforward': model_config['dim_feedforward'], 'nlayers': model_config['nlayers'],
-                  'drop_rate': model_config['dropout'], 'activation': activation, 'use_aux': use_aux,
-                  'weight': weight_aux, 'tying': model_config['tying'], 
-                  'in_dropout': model_config['in_dropout'],  'out_dropout': model_config['out_dropout'], 'mos': model_config['mos'],
-                  'n_experts': model_config['n_experts'], 'save_state': model_config['save_state'],\
-                  'adv_tr': model_config['adv_tr'], 'epsilon': model_config['epsilon'],\
-                  'gaussian': model_config['gaussian'], 'weighted_connections': model_config['weighted_connections'],
-                  'use_gru': model_config['use_gru'], 'ar_tar': model_config['ar_tar']
-                  }
+                'dim_feedforward': model_config['dim_feedforward'], 'nlayers': model_config['nlayers'],
+                'drop_rate': model_config['dropout'], 'activation': activation, 'use_aux': use_aux,
+                'weight': weight_aux, 'tying': model_config['tying'], 
+                'in_dropout': model_config['in_dropout'],  'out_dropout': model_config['out_dropout'], 'mos': model_config['mos'],
+                'n_experts': model_config['n_experts'], 'save_state': model_config['save_state'],\
+                'adv_tr': model_config['adv_tr'], 'epsilon': model_config['epsilon'],\
+                'gaussian': model_config['gaussian'], 'weighted_connections': model_config['weighted_connections'],
+                'use_gru': model_config['use_gru'], 'ar_tar': model_config['ar_tar']
+                }
     if model_config['save_state'] and training_config['use_var_len']:
         raise Exception('You can\'t use save_state and var_len in the same_time')
     model = create_model(
@@ -141,7 +143,7 @@ def main():
     #evaluate_pointer(model, val_data, ntokens, device)
 
     pytorch_total_params = sum(p.numel()
-                               for p in model.parameters() if p.requires_grad)
+                            for p in model.parameters() if p.requires_grad)
     print('-' * 89)
     print(
         '#'*12+f" Training model with {pytorch_total_params/1000000:0.2F}M trainable parameters for {epochs:3d} epochs "+'#'*12)
@@ -193,7 +195,7 @@ def main():
         args = {'schedular': schedular, 'optimizer': opt}
     elif training_config['opt'] == 'sgd_platue':
         opt = torch.optim.SGD(model.parameters(), lr=5,
-                              weight_decay=weight_decay)
+                            weight_decay=weight_decay)
 
         schedular = ReduceLROnPlateau(optimizer=opt, **Reduce_on_Plateua_args)
         schedular_args = Reduce_on_Plateua_args
@@ -225,6 +227,7 @@ def main():
     log_dir = time.strftime(
         'logging/{}_%Y_%m_%d-%H_%M_%S'.format(config['model']))
     logging = training_config['logging']
+    
 
     if continue_training:
         print('Continuing training from {} to {} for {} model'.format(
@@ -244,7 +247,7 @@ def main():
     config['log_dir'] = log_dir if logging else ""
     config['results'] = 'test_loss {:.3f}, val_loss {:.3f}, train_loss {:.3f}\
         test_ppl {:.3f}, val_ppl {:.3f}, train_ppl {:.3f}'.format(test_loss, val_loss, train_loss,
-                                                                  test_ppl, val_ppl, train_ppl)
+                                                                test_ppl, val_ppl, train_ppl)
     if logging:
         log_data('logging/log.csv', config)
 

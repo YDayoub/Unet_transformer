@@ -357,3 +357,49 @@ git commit -m 'disable printing
 '
 git push -u origin
 clear
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+git add .
+git add .
+git commit -m 'fixed errors
+'
+git push -u origin
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clera
+clera
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+/usr/bin/python3
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml

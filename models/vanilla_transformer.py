@@ -103,7 +103,8 @@ class VanillaTransformer(nn.Module):
             output Tensor of shape [seq_len, batch_size, ntoken]
         """
 
-        src = self.embedding(src) * math.sqrt(self.d_model)
+        # src = self.embedding(src) * math.sqrt(self.d_model)
+        src = self.embedding(src)
 
         if self.training and self.adv_tr:
             m = torch.distributions.Normal(

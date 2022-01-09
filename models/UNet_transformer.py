@@ -58,6 +58,9 @@ class UTransformer(nn.Module):
             self.latent = nn.Sequential(nn.Linear(d_model, n_experts*d_model),
                                         nn.Tanh())
 
+        if self.use_gru:
+            self.gru = nn.GRU(input_size=d_model, hidden_size =d_model, batch_first =False)
+
         self.use_aux = use_aux
         self.dropout_val = drop_rate
         if self.use_aux:
@@ -94,13 +97,21 @@ class UTransformer(nn.Module):
         Returns:
             output Tensor of shape [seq_len, batch_size, ntoken]
         """
-        #src = self.embedding(src) * math.sqrt(self.d_model)
-        src = self.embedding(src)
+        src = self.embedding(src) * math.sqrt(self.d_model)
+        #src = self.embedding(src)
         if self.training and self.adv_tr:
             m = torch.distributions.Normal(
                 torch.zeros_like(src), torch.ones_like(src) * 1.)
             sigma = m.sample() * self.gaussian
             src = src + sigma
+        if self.use_gru:
+            first_hidden, src = torch.split(src,[1,src.shape[0]-1])
+            #print(first_hidden.shape)
+            #print(h.shape)
+            h0,_ = self.gru(first_hidden, h)
+            #print(h0.shape)
+            src = torch.cat([h0, src],dim=0)
+            
         memory = self.pos_encoder(src)
 
         encoder_outputs = []
@@ -133,6 +144,10 @@ class UTransformer(nn.Module):
             #                memory_mask=src_mask, tgt_mask=src_mask)
 
             hidden_states.append(output)
+        if self.use_gru:
+            new_h = output[-1,:,:].detach().view(1,-1,self.d_model)
+            #print('new_h {}'.format(new_h.shape))
+
 
         output = self.dropout(output)
 
@@ -178,6 +193,6 @@ class UTransformer(nn.Module):
         outputs = [output, hidden_states]
         if self.use_aux:
             outputs = outputs + [aux_output]
-        if self.save_state:
+        if self.use_gru:
             outputs = outputs+[new_h]
         return outputs
