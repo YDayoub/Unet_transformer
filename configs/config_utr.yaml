@@ -1,10 +1,10 @@
 model: 'U-transformer' # vanilla-transformer, U-transformer
 model_config:
   d_model : 400  
-  dim_feedforward : 1024
+  dim_feedforward : 2048
   nlayers : 2
   nhead : 16
-  dropout : 0.4
+  dropout : 0.1
   out_dropout: 0.4 
   in_dropout: 0.2
   activation : 'relu'
@@ -12,9 +12,9 @@ model_config:
   mos: False
   save_state: False
   adv_tr: False
-  weighted_connections: False
+  weighted_connections: True
   ar_tar: False
-  use_gru: True
+  use_gru: False
   n_experts: 1
   gaussian: 0.2
   epsilon: 0.005
@@ -22,8 +22,9 @@ dataset_config:
   tokenizer: 'spacy' # spacy, basic_english, char, subword
   dataset: 'wiki2' # wiki2, wiki103
 training:
+  seed: 1111
   opt: 'linear' # linear, NoamOptimizer, sgd_platue, cyclic_linear,  RAdam_platue
-  n_epochs : 3
+  n_epochs : 100
   batch_size:  20
   bptt: 256
   clip_grad_norm: 0.5

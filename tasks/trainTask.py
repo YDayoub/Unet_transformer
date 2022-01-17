@@ -36,6 +36,7 @@ def train(epoch, model, optimizer, criterion, train_data,
         print('parital shuffing')
         train_data = partial_shuffle(train_data)
     prev_h = None
+    gru_h = None
 
     while i < train_data.size(0) - 1 - 1:
         data, targets = get_batch(train_data, i, get_sequence_length(bptt, use_var_len))
@@ -46,11 +47,13 @@ def train(epoch, model, optimizer, criterion, train_data,
             shape = data.shape
             prev_h = torch.zeros(
                 (1, shape[1], model.d_model), device='cuda')
+            gru_h = torch.zeros(
+                (1, shape[1], model.d_model), device='cuda')
         # elif prev_h is not None and prev_h.shape[0] != seq_length:
         #     prev_h = prev_h[-seq_length:,:,:]
 
         src_mask = generate_square_subsequent_mask(seq_length).to(device)
-        outputs = model(data, src_mask, prev_h,targets=targets)
+        outputs = model(data, src_mask, prev_h, gru_h=gru_h, targets=targets)
         output = outputs[0] 
         if alpha or beta:
             hidden_states = outputs[1]
@@ -62,7 +65,8 @@ def train(epoch, model, optimizer, criterion, train_data,
             loss += model.aux_weight * aux_loss
         # if model.save_state:
         if model.use_gru:
-            prev_h = outputs[-1]
+            prev_h = outputs[-1][0]
+            gru_h = outputs[-1][1]
             #print('prev_h {}'.format(prev_h.shape))
 
         if alpha:
@@ -99,8 +103,6 @@ def train(epoch, model, optimizer, criterion, train_data,
 
         if batch % log_interval == 0 and batch > 0:
 
-            if model.weighted_connections and printing:
-                print('skip_weights {}'.format(model.skip_weights))
             lr = optimizer.lr
             ms_per_batch = (time.time() - start_time) * 1000 / log_interval
             cur_loss = total_loss / log_interval

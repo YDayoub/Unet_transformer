@@ -58,3 +58,5 @@ class Corpus(object):
 
     def get_vocab_len(self):
         return len(self.dictionary)
+    def get_all_data(self):
+        return self.train, self.valid, self.test

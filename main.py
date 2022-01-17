@@ -65,16 +65,17 @@ def main():
         print('Error', e)
         exit(0)
 
-    #--------------- Reproducibility -------------#
-    set_seed(1111)
-    config['seed'] = 1111
-    print(config)
-    #---------------                  -------------#
+
     model_config = config['model_config']
     training_config = config['training']
     eval_config = config['eval']
     test_config = config['test']
     dataset_config = config['dataset_config']
+    #--------------- Reproducibility -------------#
+    seed = training_config['seed']
+    set_seed(seed)
+    print(config)
+    #---------------                  -------------#
     #---------------loadconfig--------------------#
     train_batch_size = training_config['batch_size']
     eval_batch_size = eval_config['batch_size']
@@ -99,22 +100,40 @@ def main():
         else:
             ds = wiki103(char=True)
     elif dataset_config['tokenizer'] == 'subword':
-        subword_path = '/home/admin/datasets/subwords.pb'
-        if os.path.isfile(subword_path):
-            ds  = torch.load(subword_path)['corpus']
-        else:
-            print('Creating subwords')
-            ds = Corpus_subword('/home/admin/datasets/wikitext-2')
-            torch.save({'corpus': ds}, subword_path)
+        if dataset_config['dataset'] == 'wiki2':
+            subword_path = '/home/admin/datasets/subwords.pb'
+            if os.path.isfile(subword_path):
+                ds  = torch.load(subword_path)['corpus']
+            else:
+                print('Creating subwords')
+                ds = Corpus_subword('/home/admin/datasets/wikitext-2')
+                torch.save({'corpus': ds}, subword_path)
+        elif dataset_config['dataset'] == 'wiki103':
+            subword_path = '/home/admin/datasets/subwords_wiki103.pb'
+            if os.path.isfile(subword_path):
+                print('Loading subwords wiki103')
+                ds  = torch.load(subword_path)['corpus']
+            else:
+                print('Creating subwords wiki103')
+                ds = Corpus_subword('datasets/wikitext-103')
+                torch.save({'corpus': ds}, subword_path)
     else:
         tokenizer = get_tokenizer(dataset_config['tokenizer'])
         if dataset_config['dataset'] == 'wiki2':
             ds = wiki2(tokenizer)
         elif dataset_config['dataset'] == 'wiki103':
-            ds = wiki103(tokenizer)
+            wiki3_path = '/home/admin/datasets/wiki3.pb'
+            if os.path.isfile(wiki3_path):
+                print('Loading wiki3 data')
+                ds  = torch.load(wiki3_path)['ds']
+            else:
+                print('Creating wiki3 data')
+                ds = wiki103(tokenizer)
+                torch.save({'ds': ds}, wiki3_path)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Training On Device: {}'.format(device))
     #------------------loading_dataset-----------------#
+    #ds = Corpus('datasets/wikitext-2')
     (train_data, val_data, test_data) = ds.get_all_data()
     train_data = batchify(train_data, train_batch_size,
                           device)  # shape [seq_len, batch_size]

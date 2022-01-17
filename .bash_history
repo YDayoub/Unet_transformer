@@ -403,3 +403,64 @@ python3 main.py --config /home/admin/configs/config_utr.yaml
 python3 main.py --config /home/admin/configs/config_utr.yaml
 python3 main.py --config /home/admin/configs/config_utr.yaml
 python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+rm -r logging/*
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+git add .
+git commit -m 'added gru'
+git push -u origin
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+clear
+datasets/get_wiki103.sh
+chmod x+u datasets/get_wiki103.sh
+chmod u+x datasets/get_wiki103.sh
+datasets/get_wiki103.sh
+clear
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml
+python3 main.py --config /home/admin/configs/config_utr.yaml

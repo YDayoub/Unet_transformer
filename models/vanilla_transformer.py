@@ -133,6 +133,7 @@ class VanillaTransformer(nn.Module):
                 hidden_states.append(output)
         if self.use_gru:
             new_h = output[-1:, :, :].detach()
+            print('new_h {}'.format(new_h.shape))
 
         output = self.dropout(output)
 
